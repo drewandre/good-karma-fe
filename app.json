@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "good-karma",
+    "slug": "good-karma",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
