@@ -1,0 +1,7 @@
+In this update:
+
+- Respond to polls! Verified accounts can now post polls for all Hounds to vote on and discuss.
+- Post 90 second videos! We increased the length of video posts from 30 seconds to 90 seconds.
+- Fixed an issue where large, 4K 60fps videos didn't upload.
+
+We're so thankful to have you a part of our growing community of hundreds of thousands of skilled tradespeople across America. Keep grinding! WOOF
