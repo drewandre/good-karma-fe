@@ -23,7 +23,7 @@ def returnTrackForTarget(target)
     when 'dev'
       return 'internal'
     when 'prod'
-      return 'production'
+      return 'internal'
     else UI.abort_with_message!('Unknown target supplied to returnTrackForTarget')
   end
 end
