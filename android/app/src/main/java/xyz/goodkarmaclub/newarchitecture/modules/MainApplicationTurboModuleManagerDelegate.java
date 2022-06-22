@@ -1,4 +1,4 @@
-package xyz.goodkarma.newarchitecture.modules;
+package xyz.goodkarmaclub.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

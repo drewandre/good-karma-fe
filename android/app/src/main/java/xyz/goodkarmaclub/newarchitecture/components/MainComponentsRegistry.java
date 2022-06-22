@@ -1,4 +1,4 @@
-package xyz.goodkarma.newarchitecture.components;
+package xyz.goodkarmaclub.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;

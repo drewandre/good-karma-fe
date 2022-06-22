@@ -1,4 +1,4 @@
-package xyz.goodkarma.newarchitecture;
+package xyz.goodkarmaclub.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.goodkarma.BuildConfig;
-import xyz.goodkarma.newarchitecture.components.MainComponentsRegistry;
-import xyz.goodkarma.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import xyz.goodkarmaclub.BuildConfig;
+import xyz.goodkarmaclub.newarchitecture.components.MainComponentsRegistry;
+import xyz.goodkarmaclub.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

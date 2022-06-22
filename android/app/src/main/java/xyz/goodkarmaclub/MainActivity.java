@@ -1,4 +1,4 @@
-package xyz.goodkarma;
+package xyz.goodkarmaclub;
 
 import android.os.Build;
 import android.os.Bundle;
