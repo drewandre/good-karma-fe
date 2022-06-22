@@ -36,8 +36,6 @@ function EventDetail({ data, id, navigation }) {
     }
   }, [])
 
-  console.log(data)
-
   function handleAddToCalendar() {
     const eventConfig = {
       title: data.name,

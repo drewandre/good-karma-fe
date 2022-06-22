@@ -29,7 +29,7 @@ RICH_PUSH_TARGET = 'rich_push'
 
 BUILD_NUMBER_INCREMENT = 1
 
-FORCE_MATCH = true
+FORCE_MATCH = false
 
 # Google::Apis.logger.level = Logger::DEBUG
 # ENV["VERBOSE"] = "true"
