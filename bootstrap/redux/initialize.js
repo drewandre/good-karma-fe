@@ -7,7 +7,12 @@ import thunk from 'redux-thunk'
 import rootReducer from './rootReducer'
 
 function generatePersistStorageVersionKey(versionNumber, buildNumber) {
-  return parseInt(`${versionNumber}${buildNumber}`.replaceAll('.', ''))
+  try {
+    return parseInt(`${versionNumber}${buildNumber}`.replaceAll('.', ''))
+  } catch (error) {
+    console.warn('Could not generate persist storage version key', error)
+    return 1
+  }
 }
 
 var BUILD_NUMBER = DeviceInfo.getBuildNumber()

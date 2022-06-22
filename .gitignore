@@ -31,7 +31,7 @@ local.properties
 *.hprof
 *.iml
 android_build
-android/app/my-release-key.keystore
+# android/app/my-release-key.keystore
 android/app/src/main/res/mipmap-*/*.png
 android/keystore.properties
 !debug.keystore
