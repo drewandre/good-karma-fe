@@ -1,0 +1,6 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace /Users/drewandre/Projects/karma/good-karma/ios/goodkarma.xcworkspace -configuration Debug -scheme goodkarma -destination id=FCED53B3-6DC3-4BAA-B84E-67906CCA43F3
+
+User defaults from command line:
+    IDEPackageSupportUseBuiltinSCM = YES
+

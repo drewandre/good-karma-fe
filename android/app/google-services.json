@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "872723978139",
+    "project_id": "good-karma-club",
+    "storage_bucket": "good-karma-club.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872723978139:android:ef953279e59ace579cf33e",
+        "android_client_info": {
+          "package_name": "xyz.goodkarmaclub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "872723978139-59vcnns7b108esisiilbqbd2hbmtfpgq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTNtqB1J2H_ofiYIWT4abzQwJS4nOJPGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "872723978139-59vcnns7b108esisiilbqbd2hbmtfpgq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

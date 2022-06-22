@@ -5,127 +5,27 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="00: is_ci" time="0.000226">
+      <testcase classname="fastlane.lanes" name="0: is_ci" time="0.000318">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="01: app_store_connect_api_key" time="0.002953">
+      <testcase classname="fastlane.lanes" name="1: app_store_connect_api_key" time="0.004425">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="02: is_ci" time="0.00024">
+      <testcase classname="fastlane.lanes" name="2: get_version_number" time="0.085262">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="03: register_devices" time="0.248583">
+      <testcase classname="fastlane.lanes" name="3: get_build_number" time="0.477763">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="04: update_app_identifier" time="0.068871">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="05: update_app_identifier" time="0.035445">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="06: update_plist_file" time="0.00259">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="07: update_plist_file" time="0.000767">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="08: update_project_team" time="0.034235">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="09: is_ci" time="0.000176">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="10: match" time="5.497256">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="11: is_ci" time="0.000319">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="12: match" time="5.931311">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="13: is_ci" time="0.000295">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="14: match" time="5.927338">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="15: is_ci" time="0.000742">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="16: match" time="6.035073">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="17: is_ci" time="0.000214">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="18: match" time="7.539508">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="19: is_ci" time="0.000209">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="20: match" time="6.566248">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="21: update_project_provisioning" time="0.037001">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="22: update_project_provisioning" time="0.071062">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="23: update_project_provisioning" time="0.031768">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="24: update_project_provisioning" time="0.029239">
+      <testcase classname="fastlane.lanes" name="4: upload_to_testflight" time="30011.08294">
         
       </testcase>
     

@@ -2,15 +2,15 @@
 fastlane_require 'dotenv'
 import 'helpers.rb'
 
-XCODEPROJ = 'ios/TradeHounds.xcodeproj'
-XCODEWORKSPACE = 'ios/TradeHounds.xcworkspace'
+XCODEPROJ = 'ios/goodkarma.xcodeproj'
+XCODEWORKSPACE = 'ios/goodkarma.xcworkspace'
 IOS_BUILD_OUTPUT_DIRECTORY = './ios_build'
 ANDROID_BUILD_OUTPUT_DIRECTORY = '../android_build'
-PLIST_PATH = 'TradeHounds/Info.plist'
+PLIST_PATH = 'goodkarma/Info.plist'
 RICH_PUSH_PLIST_PATH = 'rich_push/Info.plist'
 
 PODFILE_PATH = 'ios/Podfile'
-ENTITLEMENTS_PATH = 'TradeHounds/TradeHounds.entitlements'
+ENTITLEMENTS_PATH = 'goodkarma/goodkarma.entitlements'
 ICON_PATH = 'fastlane/metadata/app_icon.png'
 GRADLE_FILE_PATH = './android/app/build.gradle'
 METADATA_PATH = 'fastlane/metadata'
@@ -21,15 +21,15 @@ ANDROID_STAT_ICON_FILENAME = 'ic_stat_name'
 ANDROID_APP_ICON_MIPMAP_PATH = './android/app/src/main/res/mipmap'
 ANDROID_APP_ICON_DRAWABLE_PATH = './android/app/src/main/res/drawable'
 ANDROID_APP_ICON_GLOB_PATH = "/android/app/src/**/res/{mipmap,drawable}-*/{ic_launcher,ic_launcher_round,ic_notification,ic_notification_round,ic_stat_name,ic_stat_name_round}.{png,PNG}"
-IOS_APP_ICON_GLOB_PATH = '/ios/TradeHounds/Images.xcassets/AppIcon.appiconset/*.{png,PNG}'
-IOS_APP_ICON_SET_PATH = 'ios/TradeHounds/Images.xcassets'
+IOS_APP_ICON_GLOB_PATH = '/ios/goodkarma/Images.xcassets/AppIcon.appiconset/*.{png,PNG}'
+IOS_APP_ICON_SET_PATH = 'ios/goodkarma/Images.xcassets'
 APPSTORE_CONNECT_API_KEY_PATH = 'fastlane/AuthKey_W46RYPD8ZW.p8'
-PRIMARY_TARGET = 'TradeHounds'
+PRIMARY_TARGET = 'goodkarma'
 RICH_PUSH_TARGET = 'rich_push'
 
 BUILD_NUMBER_INCREMENT = 1
 
-FORCE_MATCH = false
+FORCE_MATCH = true
 
 # Google::Apis.logger.level = Logger::DEBUG
 # ENV["VERBOSE"] = "true"
@@ -110,7 +110,7 @@ platform :ios do
 
     update_project_team(
       path: XCODEPROJ,
-      teamid: "" # developer portal team id
+      teamid: "S5MRH882UM" # developer portal team id
     )
 
     # https://docs.fastlane.tools/actions/match/
@@ -157,7 +157,7 @@ platform :ios do
       xcodeproj: XCODEPROJ,
       profile: ENV["sigh_#{ENV["FASTLANE_APP_IDENTIFIER"]}_development_profile-path"],
       build_configuration: 'Debug',
-      code_signing_identity: "iPhone Development",
+      code_signing_identity: "Apple Development",
       target_filter: PRIMARY_TARGET,
     )
 
@@ -166,7 +166,7 @@ platform :ios do
       xcodeproj: XCODEPROJ,
       profile: ENV["sigh_#{ENV["FASTLANE_APP_IDENTIFIER"]}_appstore_profile-path"],
       build_configuration: 'Release',
-      code_signing_identity: "iPhone Distribution",
+      code_signing_identity: "Apple Distribution",
       target_filter: PRIMARY_TARGET,
     )
 
@@ -182,17 +182,17 @@ platform :ios do
       in_house: false,
     )
 
-    if is_ci?
-      sh("npm i")
-    else
-      sh("rm -rf node_modules && npm install")
-    end
+    # if is_ci?
+    #   sh("npm i")
+    # else
+    #   sh("rm -rf node_modules && npm install")
+    # end
 
     # https://docs.fastlane.tools/actions/cocoapods/
-    cocoapods(
-      clean_install: true,
-      podfile: PODFILE_PATH
-    )
+    # cocoapods(
+    #   clean_install: true,
+    #   podfile: PODFILE_PATH
+    # )
       
     # https://docs.fastlane.tools/actions/get_version_number/
     get_version_number(
@@ -304,9 +304,9 @@ platform :ios do
     upload_to_testflight(
       reject_build_waiting_for_review: true,
       skip_waiting_for_build_processing: options[:target] != 'prod',
-      distribute_external: options[:target] == 'prod',
+      distribute_external: false,
       changelog: changelog,
-      groups: groups,
+      # groups: groups,
       ipa: "#{IOS_BUILD_OUTPUT_DIRECTORY}/#{returniOSOutputNameForTargetEnv(options[:target], 'Release')}.ipa"
     )
 
@@ -320,8 +320,8 @@ platform :ios do
         # overwrite_screenshots: true,
         app_version: "#{lane_context[SharedValues::VERSION_NUMBER]}",
         ignore_language_directory_validation: true,
-        submit_for_review: true,
-        phased_release: true,
+        submit_for_review: false,
+        phased_release: false,
         reject_if_possible: true,
         precheck_include_in_app_purchases: false,
         run_precheck_before_submit: true,
@@ -363,11 +363,11 @@ platform :android do
   end
 
   lane :build do |options|
-    if is_ci?
-      sh("npm i")
-    else
-      sh("rm -rf node_modules && npm install")
-    end
+    # if is_ci?
+    #   sh("npm i")
+    # else
+    #   sh("rm -rf node_modules && npm install")
+    # end
 
     # Get android version: https://github.com/beplus/fastlane-plugin-versioning_android
     android_get_version_name(gradle_file: GRADLE_FILE_PATH)

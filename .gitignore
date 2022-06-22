@@ -1,9 +1,7 @@
 # OSX
-#
 .DS_Store
 
 # Xcode
-#
 build/
 *.pbxuser
 !default.pbxuser
@@ -19,17 +17,50 @@ xcuserdata
 DerivedData
 *.hmap
 *.ipa
+*.mobileprovision
+*.app.dSYM.zip
 *.xcuserstate
-project.xcworkspace
+ios/goodkarma/Images.xcassets/AppIcon.appiconset/*
+ios_build
 
 # Android/IntelliJ
-#
 build/
 .idea
 .gradle
 local.properties
-*.iml
 *.hprof
+*.iml
+android_build
+android/app/my-release-key.keystore
+android/app/src/main/res/mipmap-*/*.png
+android/keystore.properties
+!debug.keystore
+
+android/app/obfuscate/*
+
+vendor/
+
+# Legacy Eclipse project files
+.classpath
+.project
+.cproject
+.settings/
+proguard/
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
 
 # node.js
 #
@@ -40,16 +71,52 @@ yarn-error.log
 # BUCK
 buck-out/
 \.buckd/
-*.keystore
-!debug.keystore
 
-# Bundle artifacts
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
+# screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/screenshots.html
+fastlane/test_output
+fastlane/certificates
+fastlane/service_keys
+
+*.dSYM.zip
+
+# Bundle artifact
+*.bundle
+*.bundle.map
+*.bundle.meta
 *.jsbundle
+*.jsbundle.map
+*.jsbundle.meta
 
-# CocoaPods
-/ios/Pods/
+!html/Web.bundle
 
-# Expo
-.expo/
-web-build/
-dist/
+# misc
+.env.*
+.vscode
+*.hprof
+
+*.cer
+*.csv
+/*.svg
+/*.svg.png
+
+ios/Pods
+
+fastlane/supply_key.json
+fastlane/firebase_app_distribution_keys/*
+*.p8
+
+*.xcarchive
+
+src/assets/images/dev/*
+
+# Ignore test-related files
+/coverage/
