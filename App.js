@@ -15,7 +15,7 @@ import { connect } from 'react-redux'
 import messaging from '@react-native-firebase/messaging'
 import { Alert, useColorScheme, Platform, Animated } from 'react-native'
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
-import { CardStyleInterpolators } from '@react-navigation/stack'
+// import { CardStyleInterpolators } from '@react-navigation/stack'
 
 const Stack = createSharedElementStackNavigator()
 
@@ -48,9 +48,40 @@ function customFade(ref) {
 
 function App({ authenticated }) {
   const scheme = useColorScheme()
+  const navigatorRef = React.useRef(null)
+
   React.useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage))
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        console.log(
+          'App was launched from a notification',
+          JSON.stringify(remoteMessage)
+        )
+        navigatorRef.current?.navgigate?.('ArticleDetail', {
+          id: remoteMessage?.data?.id,
+        })
+      })
+
+    const unsubscribe = messaging().onMessage((remoteMessage) => {
+      console.log(
+        'App received push notification while in background',
+        JSON.stringify(remoteMessage)
+      )
+      navigatorRef.current?.navgigate?.('ArticleDetail', {
+        id: remoteMessage?.data?.id,
+      })
+      /*
+        {
+          messageId: '1656520938997820',
+          data: { type: 'article', id: '3iDcn3NhX6bjZ8f4SYHZIM' },
+          notification: {
+            body: 'Check out the body here.',
+            title: 'A new article is ready to view!'
+          },
+          from: '872723978139'
+        }
+      */
     })
 
     return function cleanup() {
@@ -58,8 +89,15 @@ function App({ authenticated }) {
     }
   }, [])
 
+  const setNavigatorRef = React.useCallback((ref) => {
+    navigatorRef.current = ref
+  }, [])
+
   return (
-    <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavigationContainer
+      theme={scheme === 'dark' ? DarkTheme : DefaultTheme}
+      ref={setNavigatorRef}
+    >
       <StatusBar style="auto" />
       <Stack.Navigator
         initialRouteName={/* !authenticated ? 'Home' : 'Login' */ 'Home'}

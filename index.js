@@ -9,7 +9,21 @@ import App from './App'
 
 // Register background handler
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-  console.log('Message handled in the background!', remoteMessage)
+  /*
+    {
+      messageId: '1656520938997820',
+      data: { type: 'article', id: '3iDcn3NhX6bjZ8f4SYHZIM' },
+      notification: {
+        body: 'Check out the body here.',
+        title: 'A new article is ready to view!'
+      },
+      from: '872723978139'
+    }
+  */
+  console.log(
+    'Message handled in the background!',
+    JSON.stringify(remoteMessage)
+  )
 })
 
 function GoodKarma() {
