@@ -1,6 +1,13 @@
+import { StatusBar } from 'expo-status-bar'
 import moment from 'moment'
 import React from 'react'
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native'
 import deviceInfoModule from 'react-native-device-info'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { connect } from 'react-redux'
@@ -10,6 +17,8 @@ import {
 } from '../../features/content/redux/contentOperations'
 import Article from '../../shared/components/Article'
 import EventsCarousel from '../../shared/components/EventsCarousel'
+import Gear from '../../shared/components/svgs/Gear'
+import { requestPushNotificationPermissions } from '../../shared/helpers/pushNotifications'
 import Colors from '../../shared/styles/Colors'
 import Metrics from '../../shared/styles/Metrics'
 
@@ -27,7 +36,9 @@ function Home({
   }, [])
 
   React.useEffect(() => {
-    if (!onboardingModalPreviouslyShown) {
+    if (onboardingModalPreviouslyShown) {
+      requestPushNotificationPermissions()
+    } else {
       setTimeout(() => {
         navigation.navigate('OnboardingModal')
       }, 1000)
@@ -60,6 +71,10 @@ function Home({
     })
   }
 
+  function handleSettingsPress() {
+    navigation.navigate('Settings')
+  }
+
   var today = new Date()
   var curHr = today.getHours()
   var text = ''
@@ -77,6 +92,7 @@ function Home({
       style={styles.screenContainer}
       edges={['right', 'top', 'left']}
     >
+      <StatusBar style="light" />
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerSubtitle}>
@@ -84,16 +100,12 @@ function Home({
           </Text>
           <Text style={styles.headerTitle}>{text}</Text>
         </View>
-        <View style={styles.headerRight}>
-          <View
-            style={{
-              width: 50,
-              borderRadius: 1000,
-              height: 50,
-              backgroundColor: 'red',
-            }}
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.headerRight}
+          onPress={handleSettingsPress}
+        >
+          <Gear fill="#fff" />
+        </TouchableOpacity>
       </View>
       <View style={styles.container}>
         <ScrollView
@@ -101,10 +113,10 @@ function Home({
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainerStyle}
         >
-          <Text style={styles.comingUpTitle}>Coming Up</Text>
+          <Text style={styles.comingUpTitle}>COMING UP</Text>
           {renderEvents()}
           <View style={styles.articleContainer}>
-            <Text style={styles.articlesTitle}>Articles</Text>
+            <Text style={styles.articlesTitle}>ARTICLES</Text>
             {renderArticles()}
           </View>
         </ScrollView>
@@ -116,44 +128,61 @@ function Home({
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#000',
   },
   container: {
-    paddingTop: 15,
     flex: 1,
-    backgroundColor: Colors.background,
+    overflow: 'hidden',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: '#111',
   },
   contentContainerStyle: {
+    overflow: 'hidden',
+    paddingTop: Metrics.defaultPadding,
     paddingBottom: deviceInfoModule.hasNotch() ? 25 : 15,
   },
   articleContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: Metrics.defaultPadding,
   },
   scrollView: {
+    overflow: 'hidden',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     flex: 1,
   },
   comingUpTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    letterSpacing: 1,
     paddingHorizontal: 15,
+    paddingBottom: 5,
   },
   articlesTitle: {
-    paddingBottom: 15,
+    color: '#fff',
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    paddingBottom: 20,
   },
   header: {
     alignSelf: 'center',
     paddingVertical: 15,
     width: Metrics.screenWidth - 30,
     flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: 'rgba(0,0,0,0.2)',
+    // borderBottomWidth: 2,
+    // borderBottomColor: 'rgba(0,0,0,0.2)',
   },
   headerLeft: {
     flex: 1,
   },
   headerTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
     paddingTop: 3,
     fontSize: 20,
   },
   headerSubtitle: {
+    color: '#fff',
     fontSize: 12,
   },
 })

@@ -5,17 +5,46 @@ import {
   DefaultTheme,
   DarkTheme,
 } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import Login from './screens/Login'
 import Home from './screens/Home'
 import OnboardingModal from './screens/OnboardingModal'
+import Settings from './screens/Settings'
 import ArticleDetail from './screens/ArticleDetail'
 import EventDetail from './screens/EventDetail'
 import { connect } from 'react-redux'
 import messaging from '@react-native-firebase/messaging'
-import { Alert, useColorScheme } from 'react-native'
+import { Alert, useColorScheme, Platform, Animated } from 'react-native'
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
+import { CardStyleInterpolators } from '@react-navigation/stack'
 
-const Stack = createNativeStackNavigator()
+const Stack = createSharedElementStackNavigator()
+
+function customFade(ref) {
+  let {
+    current,
+    inverted,
+    layouts: { screen },
+  } = ref
+  const translateY = Animated.multiply(
+    current.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [screen.height, 0],
+      extrapolate: 'clamp',
+    }),
+    inverted
+  )
+  return {
+    cardStyle: {
+      backgroundColor: '#000',
+      opacity: current.progress,
+      transform: [
+        {
+          translateY,
+        },
+      ],
+    },
+  }
+}
 
 function App({ authenticated }) {
   const scheme = useColorScheme()
@@ -32,49 +61,71 @@ function App({ authenticated }) {
   return (
     <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <StatusBar style="auto" />
-      <Stack.Navigator initialRouteName={!authenticated ? 'Home' : 'Login'}>
-        <Stack.Group>
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="Home"
-            component={Home}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="ArticleDetail"
-            component={ArticleDetail}
-            options={{
-              headerShown: false,
-              // headerShown: false,
-            }}
-          />
-        </Stack.Group>
-        <Stack.Group screenOptions={{ presentation: 'modal' }}>
-          <Stack.Screen
-            name="OnboardingModal"
-            component={OnboardingModal}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="EventDetail"
-            component={EventDetail}
-            options={
-              {
-                // headerShown: false,
-              }
-            }
-          />
-        </Stack.Group>
+      <Stack.Navigator
+        initialRouteName={/* !authenticated ? 'Home' : 'Login' */ 'Home'}
+      >
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={Home}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="ArticleDetail"
+          component={ArticleDetail}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+            cardStyle: {
+              backgroundColor: '#000',
+            },
+            cardStyleInterpolator: Platform.select({
+              ios: customFade,
+              android: customFade,
+              // android: CardStyleInterpolators.forRevealFromBottomAndroid,
+            }),
+          }}
+          sharedElements={(route, otherRoute, showing) => {
+            const { id } = route.params
+            return [
+              { id: `item.${id}.photo` },
+              { id: `item.${id}.text`, animation: 'fade' },
+              { id: `item.${id}.author`, animation: 'fade' },
+            ]
+          }}
+        />
+        <Stack.Screen
+          name="OnboardingModal"
+          component={OnboardingModal}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={Settings}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="EventDetail"
+          component={EventDetail}
+          options={{
+            headerTitle: 'Event Detail',
+            // headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   )

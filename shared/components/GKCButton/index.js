@@ -1,9 +1,10 @@
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity } from 'react-native'
+import Colors from '../../styles/Colors'
 
-function GKCButton({ title, onPress }) {
+function GKCButton({ title, onPress, style }) {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={[styles.container, style]}>
       <Text>{title}</Text>
     </TouchableOpacity>
   )
@@ -11,10 +12,14 @@ function GKCButton({ title, onPress }) {
 
 const styles = StyleSheet.create({
   container: {
-    minWidth: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 200,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: 'pink',
+    backgroundColor: Colors.backgroundLight,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.2)',
   },
 })
 

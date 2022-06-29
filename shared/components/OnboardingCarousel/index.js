@@ -6,7 +6,7 @@ import Carousel from 'react-native-snap-carousel'
 
 import Pagination from '../Pagination'
 
-import messaging from '@react-native-firebase/messaging'
+import { requestPushNotificationPermissions } from '../../helpers/pushNotifications'
 
 const screenWidth = Dimensions.get('screen').width
 
@@ -24,14 +24,7 @@ const OnboardingCarousel = React.memo(({ close, entries = [], dotWidth }) => {
   const carouselRef = React.useRef(null)
 
   async function requestPushPermissions() {
-    const authStatus = await messaging().requestPermission()
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
-
-    if (enabled) {
-      console.log('Authorization status:', authStatus)
-    }
+    await requestPushNotificationPermissions()
     close()
   }
 

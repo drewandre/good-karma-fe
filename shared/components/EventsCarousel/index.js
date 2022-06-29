@@ -1,18 +1,12 @@
 import moment from 'moment'
 import React from 'react'
-import {
-  Text,
-  View,
-  StyleSheet,
-  Dimensions,
-  Button,
-  TouchableOpacity,
-} from 'react-native'
+import { Text, View, StyleSheet, Dimensions } from 'react-native'
 import FastImage from 'react-native-fast-image'
 
 import { useSharedValue } from 'react-native-reanimated'
 import Carousel from 'react-native-snap-carousel'
 import Colors from '../../styles/Colors'
+import FPETouchable from '../FPETouchable'
 import Pagination from '../Pagination'
 
 const screenWidth = Dimensions.get('screen').width
@@ -31,7 +25,7 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
 
   const renderItem = React.useCallback(({ item }) => {
     return (
-      <TouchableOpacity
+      <FPETouchable
         style={styles.item}
         onPress={() => {
           handleEventPress(item)
@@ -46,13 +40,25 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
           />
         </View>
         <View>
-          <Text>{item.name}</Text>
-          <Text>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 'bold',
+              marginBottom: 5,
+            }}
+          >
+            {item.name}
+          </Text>
+          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
             {moment(item.date).format('dddd, MMMM Do')} •{' '}
-            {moment(item.date).format('h:mmA')} • {item.locationName}
+            {moment(item.date).format('h:mmA')}
+          </Text>
+          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
+            {item.locationName}
           </Text>
         </View>
-      </TouchableOpacity>
+      </FPETouchable>
     )
   }, [])
 
@@ -82,7 +88,7 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
         data={entries}
         renderItem={renderItem}
         sliderWidth={screenWidth}
-        itemWidth={sliderWidth + padding}
+        itemWidth={sliderWidth}
         inactiveSlideOpacity={1}
         inactiveSlideScale={1}
         onScroll={scrollHandler}
@@ -103,20 +109,18 @@ const styles = StyleSheet.create({
     width: screenWidth,
   },
   item: {
-    width: sliderWidth,
     paddingTop: padding,
   },
   imageContainer: {
-    padding: padding,
+    // padding: padding,
+    // marginHorizontal: padding * 0.5,
     marginBottom: padding,
-    backgroundColor: Colors.backgroundLight,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 5,
   },
   image: {
-    width: imageWidth,
     height: imageHeight,
     borderRadius: 10,
   },
@@ -127,6 +131,8 @@ const styles = StyleSheet.create({
   },
   paginationContainer: {
     width: '100%',
+    paddingTop: 10,
+    paddingBottom: 3,
     flexDirection: 'row',
     justifyContent: 'center',
     paddingHorizontal: padding,

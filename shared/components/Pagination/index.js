@@ -7,6 +7,8 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated'
 
+import Colors from '../../styles/Colors'
+
 function clamp(value, lowerBound, upperBound) {
   'worklet'
   return Math.min(Math.max(lowerBound, value), upperBound)
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginHorizontal: 5,
     padding: 0,
-    backgroundColor: 'red',
+    backgroundColor: 'rgba(255,255,255,0.7)',
   },
 })
 

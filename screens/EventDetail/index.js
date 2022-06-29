@@ -71,7 +71,7 @@ function EventDetail({ data, id, navigation }) {
       <ScrollView style={styles.container}>
         <FastImage
           source={{
-            uri: data.coverPhoto.src,
+            uri: data?.coverPhoto?.src,
           }}
           style={{
             width: Metrics.screenWidth,
@@ -89,6 +89,7 @@ function EventDetail({ data, id, navigation }) {
                 {moment(data.endDateTime).format('h:mmA')}
               </Text>
               <GKCButton
+                style={styles.button}
                 title="Add to Calendar"
                 onPress={handleAddToCalendar}
               />
@@ -194,6 +195,9 @@ const styles = StyleSheet.create({
   fixedSectionText: {
     color: '#999',
     fontSize: 20,
+  },
+  button: {
+    marginVertical: 15,
   },
 })
 

@@ -1,15 +1,33 @@
 import React from 'react'
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native'
+import {
+  Alert,
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  InteractionManager,
+} from 'react-native'
 import ParallaxScrollView from 'react-native-parallax-scroll-view'
 import { connect } from 'react-redux'
 import RenderHtml from 'react-native-render-html'
 import Metrics from '../../shared/styles/Metrics'
-import BackArrow from '../../shared/components/svgs/BackArrow'
+import Close from '../../shared/components/svgs/Close'
 import FastImage from 'react-native-fast-image'
-import { StatusBar } from 'expo-status-bar'
+import { StatusBar, setStatusBarHidden } from 'expo-status-bar'
+import { INLINES, BLOCKS } from '@contentful/rich-text-types'
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
+import { SharedElement } from 'react-navigation-shared-element'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
 import deviceInfoModule from 'react-native-device-info'
 
-const PARALLAX_HEADER_HEIGHT = 300
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity)
+
+const PARALLAX_HEADER_HEIGHT = Metrics.screenWidth
 const STICKY_HEADER_HEIGHT = 70
 
 function ArticleDetail({ data, id, navigation }) {
@@ -18,6 +36,34 @@ function ArticleDetail({ data, id, navigation }) {
     id: int
     content: string (rich text)
   */
+
+  function onContentfulLinkPress(event, href) {
+    Alert.alert('Link clicked!', href)
+  }
+  // https://meliorence.github.io/react-native-render-html/docs/content/images
+  // https://www.npmjs.com/package/@contentful/rich-text-html-renderer
+  const documentToHtmlStringOptions = {
+    renderNode: {
+      [BLOCKS.EMBEDDED_ASSET]: (node) => {
+        const type = node?.data?.target?.fields?.file?.contentType
+        if (type?.includes('image')) {
+          return `<img src="https:${node?.data?.target?.fields?.file.url}"></img>`
+        } else {
+          return '<div style="width:100%;padding:5px 15px;margin:15px 0;border-radius:5px;background-color:#D8D8D8;"><p style="color:#48484a;">This content is not supported :(</p></div>'
+        }
+      },
+      [INLINES.EMBEDDED_ENTRY]: (node) => {
+        return `<a href="https://google.com/ style="text-decoration-color:red;color:red !important;text-decoration:none;border-bottom:1px solid #fdf727;">${node?.data?.target?.fields?.name}</a>`
+      },
+    },
+    a: {
+      onPress: onContentfulLinkPress,
+    },
+  }
+
+  const html = React.useMemo(() => {
+    return documentToHtmlString(data?.content, documentToHtmlStringOptions)
+  }, [data?.content])
 
   React.useEffect(() => {
     if (!data) {
@@ -31,71 +77,96 @@ function ArticleDetail({ data, id, navigation }) {
     },
   }
 
+  React.useEffect(() => {
+    InteractionManager.runAfterInteractions(() => {
+      elementOpacities.value = withTiming(1)
+    })
+  })
+
+  const elementOpacities = useSharedValue(0)
+
+  const animatedCloseIconStyles = useAnimatedStyle(() => {
+    return {
+      opacity: elementOpacities.value,
+    }
+  })
+
+  function handleScroll(e) {
+    if (
+      (e?.nativeEvent?.contentOffset?.y || 0) >
+      PARALLAX_HEADER_HEIGHT - 100
+    ) {
+      setStatusBarHidden(true, 'fade')
+      elementOpacities.value = withTiming(0)
+    } else {
+      setStatusBarHidden(false, 'fade')
+      elementOpacities.value = withTiming(1)
+    }
+  }
+
   function renderData() {
     return (
-      <ParallaxScrollView
-        style={styles.container}
-        parallaxHeaderHeight={PARALLAX_HEADER_HEIGHT}
-        contentContainerStyle={styles.contentContainerStyle}
-        renderForeground={() => {
-          return (
-            <TouchableOpacity
-              onPress={navigation.goBack}
-              style={styles.backArrow}
+      <View style={styles.container}>
+        <ParallaxScrollView
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          style={styles.container}
+          parallaxHeaderHeight={PARALLAX_HEADER_HEIGHT}
+          contentContainerStyle={styles.contentContainerStyle}
+          renderBackground={() => (
+            <SharedElement
+              id={`item.${data.id}.photo`}
+              style={{ backgroundColor: '#000' }}
             >
-              <BackArrow />
-            </TouchableOpacity>
-          )
-        }}
-        renderBackground={() => (
-          <View key="background" style={{ backgroundColor: '#000' }}>
-            <FastImage
-              source={{
-                uri: data.coverPhoto.src,
-              }}
-              style={{
-                width: Metrics.screenWidth,
-                height: PARALLAX_HEADER_HEIGHT,
-              }}
-            />
-            {/* <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                width: Metrics.screenWidth,
-                backgroundColor: 'rgba(0,0,0,.4)',
-                height: PARALLAX_HEADER_HEIGHT,
-              }}
-            /> */}
+              <FastImage
+                source={{
+                  uri: data?.coverPhoto?.src,
+                }}
+                style={{
+                  width: Metrics.screenWidth,
+                  height: PARALLAX_HEADER_HEIGHT,
+                }}
+              />
+            </SharedElement>
+          )}
+        >
+          <View style={styles.parallaxHeader} key="foreground" />
+          <View style={styles.titleContainer}>
+            <SharedElement id={`item.${data.id}.text`}>
+              <Text allowFontScaling={false} style={styles.sectionSpeakerText}>
+                {data.title}
+              </Text>
+            </SharedElement>
+            <SharedElement id={`item.${data.id}.author`}>
+              <Text style={styles.sectionTitleText}>By {data.author}</Text>
+            </SharedElement>
           </View>
-        )}
-      >
-        <View style={styles.parallaxHeader} key="foreground" />
-        <View style={styles.titleContainer}>
-          <Text
-            style={styles.sectionSpeakerText}
-            numberOfLines={5}
-            adjustsFontSizeToFit
-          >
-            {data.title}
-          </Text>
-          <Text
-            style={styles.sectionTitleText}
-            numberOfLines={2}
-            adjustsFontSizeToFit
-          >
-            By {data.author}
-          </Text>
-        </View>
-        <RenderHtml
-          contentWidth={Metrics.screenWidth - 40}
-          source={{ html: data.content }}
-          defaultTextProps={{ style: { color: '#fff' } }}
-          baseStyle={{ backgroundColor: '#000', padding: 15 }}
-          renderersProps={renderersProps}
-          systemFonts={[]}
-        />
-      </ParallaxScrollView>
+          <RenderHtml
+            contentWidth={Metrics.screenWidth - 40}
+            source={{ html }}
+            defaultTextProps={{
+              style: { color: '#fff' },
+            }}
+            baseStyle={{ backgroundColor: '#000', padding: 15 }}
+            renderersProps={renderersProps}
+            systemFonts={[]}
+          />
+        </ParallaxScrollView>
+        <AnimatedTouchableOpacity
+          hitSlop={{
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20,
+          }}
+          onPress={navigation.goBack}
+          style={[animatedCloseIconStyles, styles.close]}
+        >
+          <Animated.View style={animatedCloseIconStyles}>
+            <Close fill="rgba(255,255,255,0.7)" />
+          </Animated.View>
+        </AnimatedTouchableOpacity>
+      </View>
     )
   }
 
@@ -115,14 +186,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    // paddingTop: 10,
   },
   contentContainerStyle: {
+    backgroundColor: '#000',
     // paddingHorizontal: 15,
   },
-  backArrow: {
+  close: {
     position: 'absolute',
-    top: deviceInfoModule.hasNotch() ? 50 : 25,
-    left: 25,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 100,
+    padding: 15,
+    top: deviceInfoModule.hasNotch() ? 55 : 25,
+    right: 30,
   },
   parallaxHeader: {
     backgroundColor: '#000',
@@ -131,23 +207,17 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: Metrics.defaultPadding,
+    right: Metrics.defaultPadding,
     bottom: 0,
-    overflow: 'visible',
-    top: PARALLAX_HEADER_HEIGHT * -0.5,
+    top: PARALLAX_HEADER_HEIGHT * -0.35,
   },
   sectionSpeakerText: {
-    paddingHorizontal: 15,
     color: '#fff',
-    fontSize: 40,
-    textShadowColor: '#rgba(0,0,0,0.5)',
-    textShadowRadius: 20,
+    fontSize: 55,
     fontWeight: 'bold',
-    paddingVertical: 5,
   },
   sectionTitleText: {
-    paddingHorizontal: 15,
     color: '#fff',
     fontSize: 18,
     paddingVertical: 5,

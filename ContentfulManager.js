@@ -1,29 +1,4 @@
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
 import { createClient } from 'contentful/dist/contentful.browser.min.js'
-import { BLOCKS } from '@contentful/rich-text-types'
-
-// https://meliorence.github.io/react-native-render-html/docs/content/images
-// https://www.npmjs.com/package/@contentful/rich-text-html-renderer
-const documentToHtmlStringOptions = {
-  renderNode: {
-    [BLOCKS.EMBEDDED_ASSET]: (node) => {
-      const type = node?.data?.target?.fields?.file?.contentType
-      if (type?.includes('image')) {
-        return `<img src=${'https://i.scdn.co/image/ab6761610000e5eb11520b922e1cc39475eb460f'}></img>`
-      } else {
-        return '<div style="width:100%;padding:5px 15px;margin:15px 0;border-radius:5px;background-color:#D8D8D8;"><p style="color:#48484a;">This content is not supported :(</p></div>'
-      }
-    },
-  },
-}
-
-function transformRichText(text) {
-  if (text) {
-    return documentToHtmlString(text, documentToHtmlStringOptions)
-  } else {
-    return ''
-  }
-}
 
 function transformMedia(image) {
   try {
@@ -62,7 +37,7 @@ function transformBlogPost(post) {
     title: post.fields.title,
     author: post.fields.author,
     coverPhoto: transformMedia(post.fields.coverPhoto),
-    content: transformRichText(post.fields.content),
+    content: post.fields.content,
   }
 }
 
@@ -80,7 +55,7 @@ function transformEvent(event) {
     location: event.fields.location,
     locationName: event.fields.locationName,
     artists: transformArtists(event.fields.artists),
-    about: transformRichText(event.fields.about),
+    about: event.fields.about,
   }
 }
 
