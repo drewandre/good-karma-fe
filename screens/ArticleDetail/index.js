@@ -1,10 +1,12 @@
+//@refresh reset
 import React from 'react'
 import {
   Alert,
   View,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  ActivityIndicator,
+  Share,
   InteractionManager,
 } from 'react-native'
 import ParallaxScrollView from 'react-native-parallax-scroll-view'
@@ -12,78 +14,150 @@ import { connect } from 'react-redux'
 import RenderHtml from 'react-native-render-html'
 import Metrics from '../../shared/styles/Metrics'
 import Close from '../../shared/components/svgs/Close'
+import ShareIcon from '../../shared/components/svgs/Share'
 import FastImage from 'react-native-fast-image'
 import { StatusBar, setStatusBarHidden } from 'expo-status-bar'
 import { INLINES, BLOCKS } from '@contentful/rich-text-types'
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
 import { SharedElement } from 'react-navigation-shared-element'
 import Animated, {
+  runOnJS,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
 import deviceInfoModule from 'react-native-device-info'
+import FPETouchable from '../../shared/components/FPETouchable'
+import dynamicLinks from '@react-native-firebase/dynamic-links'
+import UpArrow from '../../shared/components/svgs/DownArrow'
+import { LinearGradient } from 'expo-linear-gradient'
+import moment from 'moment'
+import { setArtistOverlay } from '../../features/content/redux/contentActions'
+import { transformArtist } from '../../ContentfulManager'
+import base64 from 'react-native-base64'
+import util from 'util'
 
-const AnimatedTouchableOpacity =
-  Animated.createAnimatedComponent(TouchableOpacity)
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
+const AnimatedParallaxScrollView =
+  Animated.createAnimatedComponent(ParallaxScrollView)
 
 const PARALLAX_HEADER_HEIGHT = Metrics.screenWidth
-const STICKY_HEADER_HEIGHT = 70
 
-function ArticleDetail({ data, id, navigation }) {
-  /*
-    title: string
-    id: int
-    content: string (rich text)
-  */
+const tagsStyles = {
+  a: {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    textDecorationColor: '#fdf727',
+  },
+}
 
-  function onContentfulLinkPress(event, href) {
-    Alert.alert('Link clicked!', href)
+const renderersProps = {
+  a: {
+    onPress: () => Alert.alert('yooooo'),
+  },
+  img: {
+    enableExperimentalPercentWidth: true,
+  },
+}
+
+const linkContainerStyles = {
+  transform: [
+    {
+      translateY: 3.5,
+    },
+  ],
+}
+
+const PRIMARY_ASSOCIATED_DOMAIN = 'goodkarmaclub.xyz'
+
+function ArticleDetail({ data, navigation, setArtistOverlay }) {
+  const scrollRef = React.useRef(null)
+
+  const [shareLoading, setShareLoading] = React.useState(false)
+
+  const translationY = useSharedValue(0)
+
+  function handleExternalLinkPress(url) {
+    if (url) {
+      navigation.navigate('WebviewModal', { uri: url })
+    }
   }
+
+  const ARenderer = React.useCallback(({ TDefaultRenderer, ...props }) => {
+    function onPress() {
+      if (props?.tnode?.init?.textNode?.parent?.attribs?.href) {
+        const link = props?.tnode?.init?.textNode?.parent?.attribs?.href
+        let data = props?.tnode?.init?.textNode?.parent?.attribs?.data || ''
+        if (link.includes(PRIMARY_ASSOCIATED_DOMAIN)) {
+          let scrubbedLink = link.replace('https://', '')
+          scrubbedLink = link.replace('http://', '')
+          let paths = scrubbedLink.split(PRIMARY_ASSOCIATED_DOMAIN)[1] || ''
+          if (paths.includes('artists')) {
+            const [path, artistId] = paths.split('/').filter((x) => x)
+            if (data) {
+              data = JSON.parse(base64.decode(data))
+              setArtistOverlay(data)
+            } else {
+              setArtistOverlay({ id: artistId })
+            }
+          }
+        } else {
+          handleExternalLinkPress(
+            props?.tnode?.init?.textNode?.parent?.attribs?.href
+          )
+        }
+      } else if (props?.tnode?.init?.domNode?.attribs?.href) {
+        handleExternalLinkPress(props?.tnode?.init?.domNode?.attribs?.href)
+      }
+    }
+    return (
+      <FPETouchable onPress={onPress} style={linkContainerStyles}>
+        <TDefaultRenderer {...props} />
+      </FPETouchable>
+    )
+  }, [])
+
+  const renderers = {
+    a: ARenderer,
+  }
+
   // https://meliorence.github.io/react-native-render-html/docs/content/images
   // https://www.npmjs.com/package/@contentful/rich-text-html-renderer
-  const documentToHtmlStringOptions = {
-    renderNode: {
-      [BLOCKS.EMBEDDED_ASSET]: (node) => {
-        const type = node?.data?.target?.fields?.file?.contentType
-        if (type?.includes('image')) {
-          return `<img src="https:${node?.data?.target?.fields?.file.url}"></img>`
-        } else {
-          return '<div style="width:100%;padding:5px 15px;margin:15px 0;border-radius:5px;background-color:#D8D8D8;"><p style="color:#48484a;">This content is not supported :(</p></div>'
-        }
+  const documentToHtmlStringOptions = React.useMemo(() => {
+    return {
+      renderNode: {
+        [BLOCKS.EMBEDDED_ASSET]: (node) => {
+          const type = node?.data?.target?.fields?.file?.contentType
+          if (type?.includes('image')) {
+            return `<img src="https:${node?.data?.target?.fields?.file.url}"></img>`
+          } else {
+            return '<div style="width:100%;padding:5px 15px;margin:15px 0;border-radius:5px;background-color:#D8D8D8;"><p style="color:#48484a;">This content is not supported :(</p></div>'
+          }
+        },
+        [INLINES.EMBEDDED_ENTRY]: (node) => {
+          const d = transformArtist(node?.data?.target)
+          return `<a href="https://goodkarmaclub.xyz/artists/${
+            d?.id
+          }" data="${base64.encode(JSON.stringify(d))}">${d?.name}</a>`
+        },
       },
-      [INLINES.EMBEDDED_ENTRY]: (node) => {
-        return `<a href="https://google.com/ style="text-decoration-color:red;color:red !important;text-decoration:none;border-bottom:1px solid #fdf727;">${node?.data?.target?.fields?.name}</a>`
-      },
-    },
-    a: {
-      onPress: onContentfulLinkPress,
-    },
-  }
+    }
+  }, [])
 
   const html = React.useMemo(() => {
     return documentToHtmlString(data?.content, documentToHtmlStringOptions)
   }, [data?.content])
 
   React.useEffect(() => {
-    if (!data) {
-      console.log('Article not found in local state -- should fetch?')
-    }
-  }, [])
-
-  const renderersProps = {
-    img: {
-      enableExperimentalPercentWidth: true,
-    },
-  }
-
-  React.useEffect(() => {
     InteractionManager.runAfterInteractions(() => {
       elementOpacities.value = withTiming(1)
+      scrollUpOpacity.value = withTiming(0)
     })
   })
 
   const elementOpacities = useSharedValue(0)
+  const scrollUpOpacity = useSharedValue(0)
 
   const animatedCloseIconStyles = useAnimatedStyle(() => {
     return {
@@ -91,68 +165,232 @@ function ArticleDetail({ data, id, navigation }) {
     }
   })
 
-  function handleScroll(e) {
-    if (
-      (e?.nativeEvent?.contentOffset?.y || 0) >
-      PARALLAX_HEADER_HEIGHT - 100
-    ) {
-      setStatusBarHidden(true, 'fade')
-      elementOpacities.value = withTiming(0)
-    } else {
-      setStatusBarHidden(false, 'fade')
-      elementOpacities.value = withTiming(1)
+  const animatedScrollIconStyles = useAnimatedStyle(() => {
+    return {
+      opacity: scrollUpOpacity.value,
     }
+  })
+
+  function setStatusBarHiddenValue(value) {
+    setStatusBarHidden(!!value, 'fade')
+  }
+
+  const animatedScrollHandler = useAnimatedScrollHandler((event) => {
+    translationY.value = event.contentOffset.y
+    if ((translationY.value || 0) > PARALLAX_HEADER_HEIGHT - 100) {
+      runOnJS(setStatusBarHiddenValue)(true)
+      elementOpacities.value = withTiming(0)
+      scrollUpOpacity.value = withTiming(1)
+    } else {
+      runOnJS(setStatusBarHiddenValue)(false)
+      elementOpacities.value = withTiming(1)
+      scrollUpOpacity.value = withTiming(0)
+    }
+  })
+
+  async function share() {
+    try {
+      setShareLoading(true)
+      const link = await dynamicLinks().buildLink({
+        link: 'https://invertase.io',
+        // domainUriPrefix is created in your Firebase console
+        domainUriPrefix: 'https://xyz.page.link',
+        // optional setup which updates Firebase analytics campaign
+        // "banner". This also needs setting up before hand
+        analytics: {
+          campaign: 'banner',
+        },
+      })
+      setShareLoading(false)
+      const result = await Share.share({
+        message:
+          'React Native | A framework for building native apps using React',
+        url: link,
+      })
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      setShareLoading(false)
+      console.error('Could not create or share a dynamic link!', error)
+    }
+  }
+
+  const htmloutput = React.useMemo(() => {
+    return (
+      <RenderHtml
+        contentWidth={Metrics.screenWidth - Metrics.defaultPadding * 2}
+        source={{ html }}
+        defaultTextProps={{
+          style: { color: '#fff', fontSize: 20, lineHeight: 27 },
+        }}
+        tagsStyles={tagsStyles}
+        defaultViewProps={{ backgroundColor: '#000' }}
+        baseStyle={{
+          backgroundColor: '#000',
+          paddingHorizontal: Metrics.defaultPadding,
+        }}
+        renderersProps={renderersProps}
+        renderers={renderers}
+        systemFonts={[]}
+      />
+    )
+  }, [html])
+
+  function scrollup() {
+    scrollRef.current?.scrollTo?.({ y: 0 })
+  }
+
+  const setScrollRef = React.useCallback((ref) => {
+    scrollRef.current = ref
+  }, [])
+
+  const animatedLinearGradientStyles = useAnimatedStyle(() => {
+    let bottom = translationY.value * 0.8
+    if (translationY.value < 0) {
+      bottom -= translationY.value
+    }
+    return {
+      position: 'absolute',
+      bottom,
+      width: '100%',
+      height: '50%',
+    }
+  })
+
+  function openDiscordLink(id) {
+    handleExternalLinkPress(`https://discordapp.com/users/${id}`)
   }
 
   function renderData() {
     return (
       <View style={styles.container}>
-        <ParallaxScrollView
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
+        <AnimatedParallaxScrollView
+          ref={setScrollRef}
+          onScroll={animatedScrollHandler}
+          scrollEnabled={!!data}
           style={styles.container}
+          indicatorStyle="white"
           parallaxHeaderHeight={PARALLAX_HEADER_HEIGHT}
           contentContainerStyle={styles.contentContainerStyle}
           renderBackground={() => (
             <SharedElement
-              id={`item.${data.id}.photo`}
+              id={`item.${data?.id}.photo`}
               style={{ backgroundColor: '#000' }}
             >
-              <FastImage
-                source={{
-                  uri: data?.coverPhoto?.src,
-                }}
+              <View
                 style={{
                   width: Metrics.screenWidth,
                   height: PARALLAX_HEADER_HEIGHT,
                 }}
-              />
+              >
+                <FastImage
+                  source={{
+                    uri: data?.coverPhoto?.src,
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                  }}
+                />
+                <AnimatedLinearGradient
+                  colors={['transparent', 'rgba(0,0,0,1)']}
+                  style={animatedLinearGradientStyles}
+                />
+              </View>
             </SharedElement>
           )}
         >
-          <View style={styles.parallaxHeader} key="foreground" />
-          <View style={styles.titleContainer}>
-            <SharedElement id={`item.${data.id}.text`}>
+          <View
+            key="foreground"
+            style={[
+              styles.parallaxHeader,
+              {
+                height: data?.fontSize?.height * 0.5,
+              },
+            ]}
+          >
+            {data ? null : <ActivityIndicator />}
+          </View>
+          {data ? (
+            <SharedElement
+              id={`item.${data?.id}.text`}
+              style={[
+                styles.titleContainer,
+                {
+                  height: data?.fontSize?.height,
+                  top: data?.fontSize?.height * -0.5,
+                },
+              ]}
+            >
               <Text allowFontScaling={false} style={styles.sectionSpeakerText}>
-                {data.title}
+                {data?.title}
               </Text>
             </SharedElement>
-            <SharedElement id={`item.${data.id}.author`}>
-              <Text style={styles.sectionTitleText}>By {data.author}</Text>
-            </SharedElement>
-          </View>
-          <RenderHtml
-            contentWidth={Metrics.screenWidth - 40}
-            source={{ html }}
-            defaultTextProps={{
-              style: { color: '#fff' },
+          ) : null}
+          <View
+            style={{
+              borderRadius: 10,
+              marginTop: Metrics.defaultPadding,
+              marginBottom: Metrics.defaultPadding * 0.5,
+              marginHorizontal: Metrics.defaultPadding,
+              flexDirection: 'row',
+              alignItems: 'center',
             }}
-            baseStyle={{ backgroundColor: '#000', padding: 15 }}
-            renderersProps={renderersProps}
-            systemFonts={[]}
-          />
-        </ParallaxScrollView>
-        <AnimatedTouchableOpacity
+          >
+            <FastImage
+              source={{ uri: data?.author?.profilePhoto?.src }}
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 4,
+                marginRight: Metrics.defaultPadding * 0.5,
+              }}
+            />
+            <View>
+              <Text style={styles.sectionAuthorTitle}>
+                {data?.author?.name}
+                {data?.author?.discordUsername ? (
+                  <FPETouchable
+                    onPress={() => openDiscordLink(data?.author?.discordId)}
+                    style={{
+                      transform: [{ translateY: 2 }],
+                    }}
+                  >
+                    <Text
+                      style={{
+                        ...styles.sectionAuthorTitle,
+                        fontWeight: 'normal',
+                        textDecorationColor: '#fdf727',
+                        textDecorationStyle: 'solid',
+                        textDecorationLine: 'underline',
+                      }}
+                    >
+                      {' '}
+                      @{data?.author?.discordUsername}
+                    </Text>
+                  </FPETouchable>
+                ) : null}
+              </Text>
+              {data?.author?.title ? (
+                <Text style={styles.sectionAuthorSubtitle}>
+                  {data?.author?.title}
+                </Text>
+              ) : null}
+              <Text style={styles.sectionAuthorSubtitle}>
+                {moment(data.createdAt).format('dddd MMMM Do, YYYY')}
+              </Text>
+            </View>
+          </View>
+          {htmloutput}
+        </AnimatedParallaxScrollView>
+        <FPETouchable
           hitSlop={{
             top: 20,
             right: 20,
@@ -162,18 +400,46 @@ function ArticleDetail({ data, id, navigation }) {
           onPress={navigation.goBack}
           style={[animatedCloseIconStyles, styles.close]}
         >
-          <Animated.View style={animatedCloseIconStyles}>
-            <Close fill="rgba(255,255,255,0.7)" />
-          </Animated.View>
-        </AnimatedTouchableOpacity>
+          <Close size={16} fill="rgba(255,255,255,0.9)" />
+        </FPETouchable>
+        <FPETouchable
+          hitSlop={{
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20,
+          }}
+          onPress={scrollup}
+          style={[animatedScrollIconStyles, styles.scrollup]}
+        >
+          <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
+        </FPETouchable>
+        {data ? (
+          <FPETouchable
+            hitSlop={{
+              top: 20,
+              right: 20,
+              bottom: 20,
+              left: 20,
+            }}
+            onPress={share}
+            style={[animatedCloseIconStyles, styles.share]}
+          >
+            {shareLoading ? (
+              <ActivityIndicator color="rgba(255,255,255,0.9)" />
+            ) : (
+              <ShareIcon size={17} fill="rgba(255,255,255,0.9)" />
+            )}
+          </FPETouchable>
+        ) : null}
       </View>
     )
   }
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" animated />
-      {data ? renderData() : <Text>Could not find this article!</Text>}
+      <StatusBar style="light" animated hidden={false} />
+      {renderData()}
     </View>
   )
 }
@@ -188,6 +454,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     // paddingTop: 10,
   },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: PARALLAX_HEADER_HEIGHT * 0.5,
+  },
   contentContainerStyle: {
     backgroundColor: '#000',
     // paddingHorizontal: 15,
@@ -196,61 +469,74 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 100,
-    padding: 15,
+    height: 45,
+    width: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
     top: deviceInfoModule.hasNotch() ? 55 : 25,
-    right: 30,
+    left: Metrics.defaultPadding,
+  },
+  scrollup: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 100,
+    height: 45,
+    width: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: deviceInfoModule.hasNotch() ? 34 : Metrics.defaultPadding,
+    right: Metrics.defaultPadding,
+  },
+  share: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 100,
+    height: 45,
+    width: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: deviceInfoModule.hasNotch() ? 55 : 25,
+    right: Metrics.defaultPadding,
   },
   parallaxHeader: {
     backgroundColor: '#000',
     overflow: 'visible',
-    height: PARALLAX_HEADER_HEIGHT / 2,
   },
   titleContainer: {
     position: 'absolute',
     left: Metrics.defaultPadding,
     right: Metrics.defaultPadding,
     bottom: 0,
-    top: PARALLAX_HEADER_HEIGHT * -0.35,
   },
   sectionSpeakerText: {
     color: '#fff',
     fontSize: 55,
     fontWeight: 'bold',
   },
-  sectionTitleText: {
+  sectionAuthorTitle: {
     color: '#fff',
-    fontSize: 18,
-    paddingVertical: 5,
+    fontWeight: 'bold',
+    fontSize: 16,
   },
-  stickySection: {
-    height: STICKY_HEADER_HEIGHT,
-    width: 300,
-    justifyContent: 'flex-end',
-  },
-  stickySectionText: {
-    color: 'white',
-    fontSize: 20,
-    margin: 10,
-  },
-  fixedSection: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  fixedSectionText: {
-    color: '#999',
-    fontSize: 20,
+  sectionAuthorSubtitle: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
   },
 })
 
 function mapStateToProps({ content }, { route }) {
   const { id } = route.params
+  const data = content.blogPosts.data.find((post) => {
+    return post.id === id
+  })
   return {
     id,
-    data: content.blogPosts.data.find((post) => {
-      return post.id === id
-    }),
+    data,
   }
 }
 
-export default connect(mapStateToProps)(ArticleDetail)
+const mapDispatchToProps = {
+  setArtistOverlay,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ArticleDetail)

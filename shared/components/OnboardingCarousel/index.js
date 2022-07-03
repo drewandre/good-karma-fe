@@ -7,6 +7,12 @@ import Carousel from 'react-native-snap-carousel'
 import Pagination from '../Pagination'
 
 import { requestPushNotificationPermissions } from '../../helpers/pushNotifications'
+import {
+  setTopicSubscriptionStatusBegin,
+  setTopicSubscriptionStatusSuccess,
+  setTopicSubscriptionStatusError,
+} from '../../../features/session/redux/sessionActions'
+import { connect } from 'react-redux'
 
 const screenWidth = Dimensions.get('screen').width
 
@@ -19,98 +25,113 @@ const imageRatio = 0.7076023392 // height/width of actual image
 const imageWidth = sliderWidth - padding * 2
 const imageHeight = imageWidth * imageRatio
 
-const OnboardingCarousel = React.memo(({ close, entries = [], dotWidth }) => {
-  const progress = useSharedValue(0)
-  const carouselRef = React.useRef(null)
+const OnboardingCarousel = React.memo(
+  ({
+    close,
+    entries = [],
+    dotWidth,
+    setTopicSubscriptionStatusBegin,
+    setTopicSubscriptionStatusSuccess,
+    setTopicSubscriptionStatusError,
+    notificationTopics,
+  }) => {
+    const progress = useSharedValue(0)
+    const carouselRef = React.useRef(null)
 
-  async function requestPushPermissions() {
-    await requestPushNotificationPermissions()
-    close()
-  }
-
-  function advanceToNextSlide() {
-    if (carouselRef.current.currentIndex === entries.length - 2) {
-      requestPushPermissions()
-    } else if (carouselRef.current.currentIndex === entries.length - 1) {
+    async function requestPushPermissions() {
+      await requestPushNotificationPermissions({
+        setTopicSubscriptionStatusBegin,
+        setTopicSubscriptionStatusSuccess,
+        setTopicSubscriptionStatusError,
+        notificationTopics,
+      })
       close()
-    } else {
-      carouselRef.current.snapToNext()
     }
-  }
 
-  const setCarouselRef = React.useCallback((ref) => {
-    carouselRef.current = ref
-  }, [])
+    function advanceToNextSlide() {
+      if (carouselRef.current.currentIndex === entries.length - 2) {
+        requestPushPermissions()
+      } else if (carouselRef.current.currentIndex === entries.length - 1) {
+        close()
+      } else {
+        carouselRef.current.snapToNext()
+      }
+    }
 
-  const renderItem = React.useCallback(({ item }) => {
+    const setCarouselRef = React.useCallback((ref) => {
+      carouselRef.current = ref
+    }, [])
+
+    const renderItem = React.useCallback(({ item }) => {
+      return (
+        <View style={styles.item}>
+          <View style={styles.imageContainer}>
+            <Image
+              accessibilityIgnoresInvertColors
+              style={styles.image}
+              source={item.image}
+            />
+          </View>
+          <View>
+            <Text>{item.title}</Text>
+            <Text>{item.subtitle}</Text>
+          </View>
+          <Button title={item.buttonText} onPress={advanceToNextSlide}>
+            <Text>{item.buttonText}</Text>
+          </Button>
+        </View>
+      )
+    }, [])
+
+    const setPaginationProgress = React.useCallback(
+      (p) => {
+        'worklet'
+        progress.value = p
+      },
+      [progress]
+    )
+
+    const scrollHandler = React.useCallback(
+      ({
+        nativeEvent: {
+          contentSize: { width },
+          contentOffset: { x },
+        },
+      }) => {
+        setPaginationProgress(x / width)
+      },
+      [setPaginationProgress]
+    )
+
     return (
-      <View style={styles.item}>
-        <View style={styles.imageContainer}>
-          <Image
-            accessibilityIgnoresInvertColors
-            style={styles.image}
-            source={item.image}
+      <View style={styles.container}>
+        <View style={styles.paginationContainer}>
+          <Pagination
+            numberOfPages={entries.length}
+            progress={progress}
+            dotWidth={dotWidth}
           />
+          <Button title="Close" onPress={close}>
+            <Text>Close</Text>
+          </Button>
         </View>
-        <View>
-          <Text>{item.title}</Text>
-          <Text>{item.subtitle}</Text>
-        </View>
-        <Button title={item.buttonText} onPress={advanceToNextSlide}>
-          <Text>{item.buttonText}</Text>
-        </Button>
+        <Carousel
+          ref={setCarouselRef}
+          data={entries}
+          scrollEnabled={false}
+          renderItem={renderItem}
+          sliderWidth={screenWidth}
+          itemWidth={sliderWidth}
+          inactiveSlideOpacity={0}
+          inactiveSlideScale={1}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          windowSize={screenWidth}
+        />
       </View>
     )
-  }, [])
-
-  const setPaginationProgress = React.useCallback(
-    (p) => {
-      'worklet'
-      progress.value = p
-    },
-    [progress]
-  )
-
-  const scrollHandler = React.useCallback(
-    ({
-      nativeEvent: {
-        contentSize: { width },
-        contentOffset: { x },
-      },
-    }) => {
-      setPaginationProgress(x / width)
-    },
-    [setPaginationProgress]
-  )
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.paginationContainer}>
-        <Pagination
-          numberOfPages={entries.length}
-          progress={progress}
-          dotWidth={dotWidth}
-        />
-        <Button title="Close" onPress={close}>
-          <Text>Close</Text>
-        </Button>
-      </View>
-      <Carousel
-        ref={setCarouselRef}
-        data={entries}
-        scrollEnabled={false}
-        renderItem={renderItem}
-        sliderWidth={screenWidth}
-        itemWidth={sliderWidth}
-        inactiveSlideOpacity={0}
-        inactiveSlideScale={1}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-        windowSize={screenWidth}
-      />
-    </View>
-  )
-})
+  }
+)
 
 const styles = StyleSheet.create({
   container: {
@@ -150,4 +171,16 @@ const styles = StyleSheet.create({
   },
 })
 
-export default OnboardingCarousel
+function mapStateToProps({ session }) {
+  return {
+    notificationTopics: session.notificationTopics,
+  }
+}
+
+const mapDispatchToProps = {
+  setTopicSubscriptionStatusBegin,
+  setTopicSubscriptionStatusSuccess,
+  setTopicSubscriptionStatusError,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(OnboardingCarousel)

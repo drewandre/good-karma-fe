@@ -5,6 +5,7 @@ import {
   GET_EVENTS_BEGIN,
   GET_EVENTS_SUCCESS,
   GET_EVENTS_ERROR,
+  SET_ARTIST_OVERLAY,
 } from './contentTypes'
 
 export const getBlogPostsBegin = () => {
@@ -42,5 +43,12 @@ export const getEventsSuccess = (payload) => {
 export const getEventsError = () => {
   return {
     type: GET_EVENTS_ERROR,
+  }
+}
+
+export const setArtistOverlay = (payload) => {
+  return {
+    type: SET_ARTIST_OVERLAY,
+    payload,
   }
 }

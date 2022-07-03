@@ -26,6 +26,7 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
   const renderItem = React.useCallback(({ item }) => {
     return (
       <FPETouchable
+        onPressInDelay={100}
         style={styles.item}
         onPress={() => {
           handleEventPress(item)

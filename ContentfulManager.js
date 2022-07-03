@@ -17,11 +17,22 @@ function transformMedia(image) {
   }
 }
 
+function transformAuthor(author) {
+  return {
+    id: author.sys.id,
+    name: author.fields.name,
+    profilePhoto: transformMedia(author.fields.profilePhoto),
+    title: author.fields.title,
+    discordUsername: author.fields.discordUsername,
+    discordId: author.fields.discordId,
+  }
+}
+
 function transformArtists(artists) {
   return artists.map(transformArtist)
 }
 
-function transformArtist(artist) {
+export function transformArtist(artist) {
   return {
     id: artist.sys.id,
     name: artist.fields.name,
@@ -35,9 +46,10 @@ function transformBlogPost(post) {
   return {
     id: post.sys.id,
     title: post.fields.title,
-    author: post.fields.author,
+    author: transformAuthor(post.fields.author),
     coverPhoto: transformMedia(post.fields.coverPhoto),
     content: post.fields.content,
+    createdAt: post.sys.createdAt,
   }
 }
 

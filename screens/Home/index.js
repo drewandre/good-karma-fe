@@ -15,6 +15,11 @@ import {
   getEvents,
   getBlogPosts,
 } from '../../features/content/redux/contentOperations'
+import {
+  setTopicSubscriptionStatusBegin,
+  setTopicSubscriptionStatusSuccess,
+  setTopicSubscriptionStatusError,
+} from '../../features/session/redux/sessionActions'
 import Article from '../../shared/components/Article'
 import EventsCarousel from '../../shared/components/EventsCarousel'
 import Gear from '../../shared/components/svgs/Gear'
@@ -29,6 +34,10 @@ function Home({
   onboardingModalPreviouslyShown,
   blogPosts,
   events,
+  setTopicSubscriptionStatusBegin,
+  setTopicSubscriptionStatusSuccess,
+  setTopicSubscriptionStatusError,
+  notificationTopics,
 }) {
   React.useEffect(() => {
     getBlogPosts()
@@ -37,7 +46,12 @@ function Home({
 
   React.useEffect(() => {
     if (onboardingModalPreviouslyShown) {
-      requestPushNotificationPermissions()
+      requestPushNotificationPermissions({
+        setTopicSubscriptionStatusBegin,
+        setTopicSubscriptionStatusSuccess,
+        setTopicSubscriptionStatusError,
+        notificationTopics,
+      })
     } else {
       setTimeout(() => {
         navigation.navigate('OnboardingModal')
@@ -60,15 +74,19 @@ function Home({
   }
 
   function renderArticles() {
-    return blogPosts.map((post) => {
-      return (
-        <Article
-          key={`blog_post_${post.id}`}
-          data={post}
-          onPress={handleArticlePress}
-        />
-      )
-    })
+    if (Array.isArray(blogPosts)) {
+      return (blogPosts || []).map((post) => {
+        return (
+          <Article
+            key={`blog_post_${post.id}`}
+            data={post}
+            onPress={handleArticlePress}
+          />
+        )
+      })
+    } else {
+      return null
+    }
   }
 
   function handleSettingsPress() {
@@ -128,14 +146,14 @@ function Home({
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
     overflow: 'hidden',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    backgroundColor: '#111',
+    // backgroundColor: Colors.backgroundLight,
   },
   contentContainerStyle: {
     overflow: 'hidden',
@@ -154,6 +172,7 @@ const styles = StyleSheet.create({
   comingUpTitle: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 17,
     letterSpacing: 1,
     paddingHorizontal: 15,
     paddingBottom: 5,
@@ -161,6 +180,7 @@ const styles = StyleSheet.create({
   articlesTitle: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 17,
     letterSpacing: 1,
     paddingBottom: 20,
   },
@@ -169,8 +189,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     width: Metrics.screenWidth - 30,
     flexDirection: 'row',
-    // borderBottomWidth: 2,
-    // borderBottomColor: 'rgba(0,0,0,0.2)',
   },
   headerLeft: {
     flex: 1,
@@ -189,6 +207,7 @@ const styles = StyleSheet.create({
 
 function mapStateToProps({ session, content }) {
   return {
+    notificationTopics: session.notificationTopics,
     blogPosts: content?.blogPosts?.data || [],
     events: content?.events?.data || [],
     onboardingModalPreviouslyShown: session?.onboardingModalPreviouslyShown,
@@ -198,6 +217,9 @@ function mapStateToProps({ session, content }) {
 const mapDispatchToProps = {
   getEvents,
   getBlogPosts,
+  setTopicSubscriptionStatusBegin,
+  setTopicSubscriptionStatusSuccess,
+  setTopicSubscriptionStatusError,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
