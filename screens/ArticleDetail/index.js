@@ -30,7 +30,7 @@ import Animated, {
 import deviceInfoModule from 'react-native-device-info'
 import FPETouchable from '../../shared/components/FPETouchable'
 import dynamicLinks from '@react-native-firebase/dynamic-links'
-import UpArrow from '../../shared/components/svgs/DownArrow'
+import UpArrow from '../../shared/components/svgs/UpArrow'
 import { LinearGradient } from 'expo-linear-gradient'
 import moment from 'moment'
 import { setArtistOverlay } from '../../features/content/redux/contentActions'
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     width: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    top: deviceInfoModule.hasNotch() ? 55 : 25,
+    top: deviceInfoModule.hasNotch() ? 45 : Metrics.defaultPadding,
     left: Metrics.defaultPadding,
   },
   scrollup: {
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     width: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    top: deviceInfoModule.hasNotch() ? 55 : 25,
+    top: deviceInfoModule.hasNotch() ? 45 : Metrics.defaultPadding,
     right: Metrics.defaultPadding,
   },
   parallaxHeader: {

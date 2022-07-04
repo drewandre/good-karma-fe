@@ -110,7 +110,7 @@ function Home({
       style={styles.screenContainer}
       edges={['right', 'top', 'left']}
     >
-      <StatusBar style="light" />
+      <StatusBar style="light" hidden={false} />
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerSubtitle}>
@@ -122,7 +122,7 @@ function Home({
           style={styles.headerRight}
           onPress={handleSettingsPress}
         >
-          <Gear fill="#fff" />
+          <Gear fill="rgba(255,255,255,0.9)" />
         </TouchableOpacity>
       </View>
       <View style={styles.container}>
@@ -170,17 +170,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   comingUpTitle: {
-    color: '#fff',
+    color: 'rgba(255,255,255,0.9)',
     fontWeight: 'bold',
-    fontSize: 17,
+    fontSize: 15,
     letterSpacing: 1,
     paddingHorizontal: 15,
-    paddingBottom: 5,
   },
   articlesTitle: {
-    color: '#fff',
+    color: 'rgba(255,255,255,0.9)',
     fontWeight: 'bold',
-    fontSize: 17,
+    fontSize: 15,
     letterSpacing: 1,
     paddingBottom: 20,
   },
@@ -197,11 +196,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     paddingTop: 3,
-    fontSize: 20,
+    fontSize: 26,
   },
   headerSubtitle: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 16,
   },
 })
 

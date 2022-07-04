@@ -61,7 +61,7 @@ function Article({ data, onPress }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 35,
+    marginBottom: 25,
     justifyContent: 'center',
     shadowColor: '#000',
     shadowRadius: 5,

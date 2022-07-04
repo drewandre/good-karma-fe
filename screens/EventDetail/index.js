@@ -19,6 +19,9 @@ import moment from 'moment'
 import GKCButton from '../../shared/components/GKCButton'
 import * as AddCalendarEvent from 'react-native-add-calendar-event'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
+import { INLINES, BLOCKS } from '@contentful/rich-text-types'
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
 
 const PARALLAX_HEADER_HEIGHT = 300
 const STICKY_HEADER_HEIGHT = 70
@@ -66,6 +69,77 @@ function EventDetail({ data, id, navigation }) {
     },
   }
 
+  function handleExternalLinkPress(url) {
+    if (url) {
+      navigation.navigate('WebviewModal', { uri: url })
+    }
+  }
+
+  const ARenderer = React.useCallback(({ TDefaultRenderer, ...props }) => {
+    function onPress() {
+      if (props?.tnode?.init?.textNode?.parent?.attribs?.href) {
+        const link = props?.tnode?.init?.textNode?.parent?.attribs?.href
+        let data = props?.tnode?.init?.textNode?.parent?.attribs?.data || ''
+        if (link.includes(PRIMARY_ASSOCIATED_DOMAIN)) {
+          let scrubbedLink = link.replace('https://', '')
+          scrubbedLink = link.replace('http://', '')
+          let paths = scrubbedLink.split(PRIMARY_ASSOCIATED_DOMAIN)[1] || ''
+          if (paths.includes('artists')) {
+            const [path, artistId] = paths.split('/').filter((x) => x)
+            if (data) {
+              data = JSON.parse(base64.decode(data))
+              setArtistOverlay(data)
+            } else {
+              setArtistOverlay({ id: artistId })
+            }
+          }
+        } else {
+          handleExternalLinkPress(
+            props?.tnode?.init?.textNode?.parent?.attribs?.href
+          )
+        }
+      } else if (props?.tnode?.init?.domNode?.attribs?.href) {
+        handleExternalLinkPress(props?.tnode?.init?.domNode?.attribs?.href)
+      }
+    }
+    return (
+      <FPETouchable onPress={onPress} style={linkContainerStyles}>
+        <TDefaultRenderer {...props} />
+      </FPETouchable>
+    )
+  }, [])
+
+  const renderers = {
+    a: ARenderer,
+  }
+
+  // https://meliorence.github.io/react-native-render-html/docs/content/images
+  // https://www.npmjs.com/package/@contentful/rich-text-html-renderer
+  const documentToHtmlStringOptions = React.useMemo(() => {
+    return {
+      renderNode: {
+        [BLOCKS.EMBEDDED_ASSET]: (node) => {
+          const type = node?.data?.target?.fields?.file?.contentType
+          if (type?.includes('image')) {
+            return `<img src="https:${node?.data?.target?.fields?.file.url}"></img>`
+          } else {
+            return '<div style="width:100%;padding:5px 15px;margin:15px 0;border-radius:5px;background-color:#D8D8D8;"><p style="color:#48484a;">This content is not supported :(</p></div>'
+          }
+        },
+        [INLINES.EMBEDDED_ENTRY]: (node) => {
+          const d = transformArtist(node?.data?.target)
+          return `<a href="https://goodkarmaclub.xyz/artists/${
+            d?.id
+          }" data="${base64.encode(JSON.stringify(d))}">${d?.name}</a>`
+        },
+      },
+    }
+  }, [])
+
+  const html = React.useMemo(() => {
+    return documentToHtmlString(data?.about, documentToHtmlStringOptions)
+  }, [data?.about])
+
   function renderData() {
     return (
       <ScrollView style={styles.container}>
@@ -78,13 +152,27 @@ function EventDetail({ data, id, navigation }) {
             height: PARALLAX_HEADER_HEIGHT,
           }}
         />
+        <LinearGradient
+          colors={['rgba(0,0,0,1)', 'transparent']}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            width: '100%',
+            height: 200,
+          }}
+        />
         <View style={styles.metadataContainer}>
-          <Text>{data.name}</Text>
+          <Text style={styles.eventTitle}>{data.name}</Text>
+          <Text style={styles.eventLocation}>{data.locationName}</Text>
           <View style={styles.rowContainer}>
             <Calendar />
             <View style={styles.wrapper}>
-              <Text>{moment(data.startDateTime).format('dddd MMMM do')}</Text>
-              <Text>
+              <Text style={styles.eventDate}>
+                {moment(data.startDateTime).format('dddd MMMM do')}
+              </Text>
+              <Text style={styles.eventTime}>
                 {moment(data.startDateTime).format('h:mmA')} -{' '}
                 {moment(data.endDateTime).format('h:mmA')}
               </Text>
@@ -95,21 +183,15 @@ function EventDetail({ data, id, navigation }) {
               />
             </View>
           </View>
-          <View style={styles.rowContainer}>
-            <MapPin />
-            <View style={styles.wrapper}>
-              <Text>{data.locationName}</Text>
-            </View>
-          </View>
-          <Text>About</Text>
+          <Text style={styles.eventDescription}>ABOUT</Text>
         </View>
         <RenderHtml
           contentWidth={Metrics.screenWidth - 40}
-          source={{ html: data.about }}
-          // defaultTextProps={{ style: { color: '#fff' } }}
+          source={{ html }}
+          defaultTextProps={{ style: { color: '#fff' } }}
           baseStyle={{
-            backgroundColor: Colors.background,
-            paddingHorizontal: 15,
+            // backgroundColor: Colors.background,
+            paddingHorizontal: Metrics.defaultPadding,
           }}
           renderersProps={renderersProps}
           systemFonts={[]}
@@ -139,20 +221,42 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.black,
   },
   metadataContainer: {
-    padding: 15,
+    paddingTop: Metrics.defaultPadding,
+    paddingHorizontal: Metrics.defaultPadding,
   },
   backArrow: {
     position: 'absolute',
     top: deviceInfoModule.hasNotch() ? 50 : 25,
-    left: 25,
+    left: Metrics.defaultPadding,
   },
   parallaxHeader: {
     backgroundColor: Colors.background,
     overflow: 'visible',
     height: PARALLAX_HEADER_HEIGHT / 2,
+  },
+  eventTitle: {
+    color: '#fff',
+    fontSize: 40,
+  },
+  eventDate: {
+    color: '#fff',
+  },
+  eventTime: {
+    color: '#fff',
+  },
+  eventLocation: {
+    color: '#fff',
+    fontSize: 20,
+  },
+  eventDescription: {
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: 'bold',
+    fontSize: 15,
+    letterSpacing: 1,
+    paddingTop: 10,
   },
   titleContainer: {
     position: 'absolute',
@@ -163,7 +267,7 @@ const styles = StyleSheet.create({
     top: PARALLAX_HEADER_HEIGHT * -0.5,
   },
   sectionSpeakerText: {
-    paddingHorizontal: 15,
+    paddingHorizontal: Metrics.defaultPadding,
     color: '#fff',
     fontSize: 40,
     textShadowColor: '#rgba(0,0,0,0.5)',
@@ -172,7 +276,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   sectionTitleText: {
-    paddingHorizontal: 15,
+    paddingHorizontal: Metrics.defaultPadding,
     color: '#fff',
     fontSize: 18,
     paddingVertical: 5,

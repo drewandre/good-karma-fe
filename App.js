@@ -32,7 +32,7 @@ import ArtistOverlay from './shared/components/ArtistOverlay'
 import Close from './shared/components/svgs/Close'
 import FPETouchable from './shared/components/FPETouchable'
 import Metrics from './shared/styles/Metrics'
-import UpArrow from './shared/components/svgs/DownArrow'
+import DownArrow from './shared/components/svgs/DownArrow'
 
 const Stack = createSharedElementStackNavigator()
 
@@ -236,7 +236,9 @@ function App({
               headerStyle: {
                 backgroundColor: 'transparent',
               },
-              headerBackImage: () => <UpArrow style={styles.modalDownArrow} />,
+              headerBackImage: () => (
+                <DownArrow style={styles.modalDownArrow} />
+              ),
               headerBackgroundContainerStyle: {
                 backgroundColor: Colors.background,
               },
@@ -256,7 +258,7 @@ function App({
                   backgroundColor: 'transparent',
                 },
                 headerBackImage: () => (
-                  <UpArrow style={styles.modalDownArrow} />
+                  <DownArrow style={styles.modalDownArrow} />
                 ),
                 headerBackgroundContainerStyle: {
                   backgroundColor: Colors.background,
@@ -285,6 +287,12 @@ function App({
             name="EventDetail"
             component={EventDetail}
             options={{
+              headerTransparent: true,
+              headerTintColor: Colors.white,
+              headerBackTitleVisible: false,
+              headerStyle: {
+                backgroundColor: Colors.background,
+              },
               headerTitle: 'Event Detail',
             }}
           />

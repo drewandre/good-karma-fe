@@ -363,7 +363,7 @@
 				CODE_SIGN_ENTITLEMENTS = goodkarma/goodkarma.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = S5MRH882UM;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -399,7 +399,7 @@
 				CODE_SIGN_ENTITLEMENTS = goodkarma/goodkarma.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = S5MRH882UM;
 				INFOPLIST_FILE = goodkarma/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
