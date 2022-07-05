@@ -36,7 +36,6 @@ import moment from 'moment'
 import { setArtistOverlay } from '../../features/content/redux/contentActions'
 import { transformArtist } from '../../ContentfulManager'
 import base64 from 'react-native-base64'
-import util from 'util'
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 const AnimatedParallaxScrollView =
@@ -77,6 +76,8 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
   const [shareLoading, setShareLoading] = React.useState(false)
 
   const translationY = useSharedValue(0)
+  const elementOpacities = useSharedValue(0)
+  const scrollUpOpacity = useSharedValue(0)
 
   function handleExternalLinkPress(url) {
     if (url) {
@@ -155,9 +156,6 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
       scrollUpOpacity.value = withTiming(0)
     })
   })
-
-  const elementOpacities = useSharedValue(0)
-  const scrollUpOpacity = useSharedValue(0)
 
   const animatedCloseIconStyles = useAnimatedStyle(() => {
     return {

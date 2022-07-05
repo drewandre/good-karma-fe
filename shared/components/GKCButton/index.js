@@ -1,12 +1,13 @@
 import React from 'react'
-import { StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import Colors from '../../styles/Colors'
+import FPETouchable from '../FPETouchable'
 
 function GKCButton({ title, onPress, style }) {
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.container, style]}>
-      <Text>{title}</Text>
-    </TouchableOpacity>
+    <FPETouchable onPress={onPress} style={[styles.container, style]}>
+      <Text style={styles.text}>{title}</Text>
+    </FPETouchable>
   )
 }
 
@@ -17,9 +18,13 @@ const styles = StyleSheet.create({
     width: 200,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: Colors.backgroundLight,
+    backgroundColor: Colors.yellow,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.2)',
+  },
+  text: {
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
 })
 

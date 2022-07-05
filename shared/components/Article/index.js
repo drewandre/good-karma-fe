@@ -70,10 +70,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   innerContainer: {
-    shadowColor: '#fff',
-    shadowRadius: 6,
-    shadowOpacity: 0.01,
-    shadowOffset: { width: 15 },
+    shadowColor: '#000',
+    shadowRadius: 5,
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 5 },
     zIndex: 10,
   },
   articleTitle: {

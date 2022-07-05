@@ -30,6 +30,7 @@ function SettingsItem({ onChange, topic, title, description, subscribed }) {
         </Text>
       </View>
       <Switch
+        thumbColor={Colors.background}
         style={styles.switch}
         value={subscribed}
         onValueChange={handleChange}

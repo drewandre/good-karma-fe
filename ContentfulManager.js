@@ -61,10 +61,12 @@ function transformEvent(event) {
   return {
     id: event.sys.id,
     name: event.fields.name,
+    shortDescription: event.fields.shortDescription,
     coverPhoto: transformMedia(event.fields.coverPhoto),
     date: event.fields.date,
     endDateTime: event.fields.endDateTime,
     location: event.fields.location,
+    locationAddress: event.fields.locationAddress,
     locationName: event.fields.locationName,
     artists: transformArtists(event.fields.artists),
     about: event.fields.about,

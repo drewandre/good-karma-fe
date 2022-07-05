@@ -4,13 +4,16 @@ import Svg, { Path } from 'react-native-svg'
 
 import Colors from '../../../styles/Colors'
 
-function Calendar({ style, fill = Colors.icon }) {
+function Calendar({ style, fill = Colors.white }) {
   return (
-    <Svg width="35" height="36" viewBox="0 0 35 36" fill="none" style={style}>
-      <Path
-        d="M22.8468 11.4274H22.1331V10H20.7057V11.4274H13.5686V10H12.1411V11.4274H11.4274C10.6423 11.4274 10 12.0698 10 12.8548V24.2742C10 25.0593 10.6423 25.7017 11.4274 25.7017H22.8468C23.6319 25.7017 24.2742 25.0593 24.2742 24.2742V12.8548C24.2742 12.0698 23.6319 11.4274 22.8468 11.4274ZM22.8468 24.2742H11.4274V14.996H22.8468V24.2742Z"
-        fill={fill}
-      />
+    <Svg
+      fill={fill}
+      viewBox="0 0 24 24"
+      width="24px"
+      height="24px"
+      style={style}
+    >
+      <Path d="M 7 1 C 6.448 1 6 1.448 6 2 L 6 3 L 5 3 C 3.9 3 3 3.9 3 5 L 3 19 C 3 20.1 3.9 21 5 21 L 19 21 C 20.1 21 21 20.1 21 19 L 21 5 C 21 3.9 20.1 3 19 3 L 18 3 L 18 2 C 18 1.448 17.552 1 17 1 C 16.448 1 16 1.448 16 2 L 16 3 L 8 3 L 8 2 C 8 1.448 7.552 1 7 1 z M 5 8 L 19 8 L 19 18 C 19 18.552 18.552 19 18 19 L 6 19 C 5.448 19 5 18.552 5 18 L 5 8 z" />
     </Svg>
   )
 }

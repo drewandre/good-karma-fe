@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar'
-import moment from 'moment'
 import React from 'react'
 import {
   View,
+  Image,
   Text,
   StyleSheet,
   ScrollView,
@@ -97,14 +97,6 @@ function Home({
   var curHr = today.getHours()
   var text = ''
 
-  if (curHr < 12) {
-    text = 'Good Morning!'
-  } else if (curHr < 18) {
-    text = 'Good Afternoon!'
-  } else {
-    text = 'Good Evening!'
-  }
-
   return (
     <SafeAreaView
       style={styles.screenContainer}
@@ -113,10 +105,10 @@ function Home({
       <StatusBar style="light" hidden={false} />
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerSubtitle}>
-            {moment().format('dddd, MMMM Do')}
-          </Text>
-          <Text style={styles.headerTitle}>{text}</Text>
+          <Image
+            style={styles.headerTitle}
+            source={require('../../assets/warped-logo-yellow.png')}
+          />
         </View>
         <TouchableOpacity
           style={styles.headerRight}
@@ -131,7 +123,7 @@ function Home({
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainerStyle}
         >
-          <Text style={styles.comingUpTitle}>COMING UP</Text>
+          <Text style={styles.comingUpTitle}>UPCOMING EVENTS</Text>
           {renderEvents()}
           <View style={styles.articleContainer}>
             <Text style={styles.articlesTitle}>ARTICLES</Text>
@@ -170,14 +162,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   comingUpTitle: {
-    color: 'rgba(255,255,255,0.9)',
+    // color: 'rgba(255,255,255,0.9)',
+    color: Colors.yellow,
     fontWeight: 'bold',
     fontSize: 15,
     letterSpacing: 1,
     paddingHorizontal: 15,
   },
   articlesTitle: {
-    color: 'rgba(255,255,255,0.9)',
+    // color: 'rgba(255,255,255,0.9)',
+    color: Colors.yellow,
     fontWeight: 'bold',
     fontSize: 15,
     letterSpacing: 1,
@@ -191,12 +185,12 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
+    alignItems: 'center',
   },
   headerTitle: {
-    color: '#fff',
-    fontWeight: 'bold',
-    paddingTop: 3,
-    fontSize: 26,
+    width: 80,
+    height: 50,
+    resizeMode: 'contain',
   },
   headerSubtitle: {
     color: '#fff',

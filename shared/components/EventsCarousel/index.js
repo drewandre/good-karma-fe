@@ -28,30 +28,34 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
           handleEventPress(item)
         }}
       >
-        <FastImage
-          accessibilityIgnoresInvertColors
-          style={styles.image}
-          resizeMode="cover"
-          source={{ uri: item.coverPhoto.src }}
-        />
-        <View style={styles.textContainer}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: 'bold',
-              marginBottom: 5,
-            }}
-          >
-            {item.name}
-          </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
-            {moment(item.date).format('dddd, MMMM Do')} •{' '}
-            {moment(item.date).format('h:mmA')}
-          </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
-            {item.locationName}
-          </Text>
+        <View style={styles.contentContainer}>
+          <View style={styles.imageShadow}>
+            <FastImage
+              accessibilityIgnoresInvertColors
+              style={styles.image}
+              resizeMode="cover"
+              source={{ uri: item.coverPhoto.src }}
+            />
+          </View>
+          <View style={styles.textContainer}>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 16,
+                fontWeight: 'bold',
+                marginBottom: 5,
+              }}
+            >
+              {item.name}
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
+              {moment(item.date).format('dddd, MMMM Do')} •{' '}
+              {moment(item.date).format('h:mmA')}
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
+              {item.locationName}
+            </Text>
+          </View>
         </View>
       </FPETouchable>
     )
@@ -105,16 +109,22 @@ const styles = StyleSheet.create({
     paddingVertical: Metrics.defaultPadding,
     marginRight: 20,
     shadowColor: '#000',
+    shadowRadius: 5,
     shadowOpacity: 0.2,
+    shadowOffset: { height: 5, width: 5 },
+  },
+  imageShadow: {
+    shadowColor: '#000',
     shadowRadius: 10,
+    shadowOpacity: 0.2,
+  },
+  contentContainer: {
+    overflow: 'hidden',
+    backgroundColor: Colors.backgroundLight,
+    borderRadius: 20,
   },
   textContainer: {
-    backgroundColor: Colors.backgroundLight,
-    paddingTop: Metrics.defaultPadding * 0.75,
-    paddingBottom: Metrics.defaultPadding * 0.75,
-    paddingHorizontal: Metrics.defaultPadding * 0.75,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    padding: Metrics.defaultPadding,
   },
   image: {
     borderTopLeftRadius: 20,

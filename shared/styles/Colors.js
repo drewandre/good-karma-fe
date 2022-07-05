@@ -4,6 +4,7 @@ const Colors = {
   icon: '#38464A',
   white: '#fff',
   black: '#000',
+  yellow: '#fdf727',
 }
 
 export default Colors

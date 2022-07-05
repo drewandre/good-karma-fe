@@ -287,11 +287,14 @@ function App({
             name="EventDetail"
             component={EventDetail}
             options={{
-              headerTransparent: true,
+              headerShadowVisible: false,
               headerTintColor: Colors.white,
               headerBackTitleVisible: false,
               headerStyle: {
-                backgroundColor: Colors.background,
+                backgroundColor: Colors.black,
+              },
+              cardStyle: {
+                backgroundColor: Colors.black,
               },
               headerTitle: 'Event Detail',
             }}
