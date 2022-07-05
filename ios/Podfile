@@ -24,7 +24,7 @@ target 'goodkarma' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => true,
+    :hermes_enabled => flags[:hermes_enabled] || podfile_properties['expo.jsEngine'] == 'hermes',
     :fabric_enabled => false,
     # An absolute path to your application root.
     :app_path => "#{Dir.pwd}/.."

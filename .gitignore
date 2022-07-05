@@ -120,3 +120,8 @@ src/assets/images/dev/*
 
 # Ignore test-related files
 /coverage/
+
+# Expo
+.expo/
+web-build/
+dist/
