@@ -12,7 +12,6 @@ install! 'cocoapods',
 $RNFirebaseAsStaticFramework = true
 
 target 'goodkarma' do
-  $static_framework = []
   use_expo_modules!
 
   config = use_native_modules!
