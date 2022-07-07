@@ -1,11 +1,7 @@
 //@refresh reset
 import React from 'react'
 import { StatusBar } from 'expo-status-bar'
-import {
-  NavigationContainer,
-  DefaultTheme,
-  DarkTheme,
-} from '@react-navigation/native'
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native'
 import Login from './screens/Login'
 import Home from './screens/Home'
 import OnboardingModal from './screens/OnboardingModal'
@@ -18,10 +14,13 @@ import messaging from '@react-native-firebase/messaging'
 import {
   Animated as RNAnimated,
   StyleSheet,
-  useColorScheme,
   Platform,
   View,
   Text,
+  Image,
+  ScrollView,
+  SafeAreaView,
+  Animated,
 } from 'react-native'
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 import Colors from './shared/styles/Colors'
@@ -33,8 +32,31 @@ import Close from './shared/components/svgs/Close'
 import FPETouchable from './shared/components/FPETouchable'
 import Metrics from './shared/styles/Metrics'
 import DownArrow from './shared/components/svgs/DownArrow'
+import Menu from './shared/components/svgs/Menu'
+import * as SplashScreen from 'expo-splash-screen'
+import { createDrawerNavigator } from '@react-navigation/drawer'
+import Gear from './shared/components/svgs/Gear'
+import HomeIcon from './shared/components/svgs/Home'
+
+const forFade = ({ current, next }) => {
+  const opacity = Animated.add(
+    current.progress,
+    next ? next.progress : 0
+  ).interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [0, 1, 0],
+  })
+
+  return {
+    leftButtonStyle: { opacity },
+    rightButtonStyle: { opacity },
+    titleStyle: { opacity },
+    backgroundStyle: { opacity },
+  }
+}
 
 const Stack = createSharedElementStackNavigator()
+const Drawer = createDrawerNavigator()
 
 function customFade(ref) {
   let {
@@ -63,12 +85,215 @@ function customFade(ref) {
   }
 }
 
+function MyStack() {
+  const logo = React.useMemo(() => {
+    return (
+      <Image
+        source={require('./assets/warped-logo-yellow.png')}
+        style={styles.logo}
+      />
+    )
+  }, [])
+  return (
+    <Stack.Navigator
+      initialRouteName={/* !authenticated ? 'Home' : 'Login' */ 'Home'}
+    >
+      <Stack.Screen
+        name="Login"
+        component={Login}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Home"
+        component={Home}
+        options={({ navigation }) => ({
+          headerStyleInterpolator: forFade,
+          headerStyle: {
+            shadowRadius: 8,
+            shadowColor: '#000',
+            shadowOpacity: 0.4,
+            shadowOffset: {
+              height: 0,
+            },
+            backgroundColor: Colors.backgroundLight,
+            borderBottomWidth: 0,
+            borderWidth: 0,
+          },
+          headerLeft: () => {
+            return (
+              <FPETouchable
+                haptic
+                style={{ marginHorizontal: Metrics.defaultPadding }}
+                onPress={() => {
+                  navigation.openDrawer()
+                }}
+              >
+                <Menu fill={Colors.white} />
+              </FPETouchable>
+            )
+          },
+          headerTitle: () => {
+            return logo
+          },
+        })}
+      />
+      <Stack.Screen
+        name="ArticleDetail"
+        component={ArticleDetail}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+          cardStyle: {
+            backgroundColor: '#000',
+          },
+          cardStyleInterpolator: Platform.select({
+            ios: customFade,
+            android: customFade,
+            // android: CardStyleInterpolators.forRevealFromBottomAndroid,
+          }),
+        }}
+        sharedElements={(route, otherRoute, showing) => {
+          const { id } = route.params
+          if (otherRoute?.name !== 'WebviewModal') {
+            return [
+              { id: `item.${id}.photo` },
+              { id: `item.${id}.text`, animation: 'fade' },
+              { id: `item.${id}.author`, animation: 'fade' },
+            ]
+          } else {
+            return []
+          }
+        }}
+      />
+      <Stack.Screen
+        name="OnboardingModal"
+        component={OnboardingModal}
+        options={{
+          gestureEnabled: false,
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          headerTintColor: '#fff',
+          // presentation: 'modal',
+          headerTitleStyle: {},
+          headerStyle: {
+            shadowRadius: 8,
+            shadowColor: '#000',
+            shadowOpacity: 0.4,
+            shadowOffset: {
+              height: 0,
+            },
+            backgroundColor: Colors.backgroundLight,
+            borderBottomWidth: 0,
+            borderWidth: 0,
+          },
+          headerBackImage: () => <DownArrow style={styles.modalDownArrow} />,
+          headerBackgroundContainerStyle: {
+            backgroundColor: Colors.background,
+          },
+          headerTitle: 'Settings',
+          headerBackTitleVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="WebviewModal"
+        component={WebviewModal}
+        options={({ navigation, route }) => {
+          return {
+            headerTintColor: '#fff',
+            presentation: 'modal',
+            headerTitleStyle: {},
+            headerStyle: {
+              backgroundColor: 'transparent',
+            },
+            headerBackImage: () => <DownArrow style={styles.modalDownArrow} />,
+            headerBackgroundContainerStyle: {
+              backgroundColor: Colors.background,
+            },
+            headerTitle: () => {
+              return (
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    paddingHorizontal: Metrics.defaultPadding,
+                  }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {route?.params?.headerTitle || 'Loading...'}
+                </Text>
+              )
+            },
+            headerBackTitleVisible: false,
+          }
+        }}
+      />
+      <Stack.Screen
+        name="EventDetail"
+        component={EventDetail}
+        options={{
+          cardStyle: {
+            backgroundColor: Colors.black,
+          },
+          headerStyleInterpolator: forFade,
+          headerTransparent: true,
+          headerTitle: '',
+          headerBackTitleVisible: false,
+          headerBackImage: () => null,
+          // headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+function CustomDrawerContent(props) {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView {...props} style={{ padding: Metrics.defaultPadding }}>
+        <FPETouchable
+          style={styles.drawerMenuItemContainer}
+          onPress={() => {
+            props.navigation.closeDrawer()
+            setTimeout(() => props.navigation.navigate('Home'), 200)
+          }}
+        >
+          <View style={{ flexDirection: 'row' }}>
+            <HomeIcon fill={Colors.white} style={{ width: 50 }} />
+            <Text style={styles.drawerMenuItemText}>Home</Text>
+          </View>
+        </FPETouchable>
+        <FPETouchable
+          style={styles.drawerMenuItemContainer}
+          onPress={() => {
+            props.navigation.closeDrawer()
+            setTimeout(() => props.navigation.navigate('Settings'), 200)
+          }}
+        >
+          <View style={{ flexDirection: 'row' }}>
+            <Gear fill={Colors.white} style={{ width: 50 }} />
+            <Text style={styles.drawerMenuItemText}>Settings</Text>
+          </View>
+        </FPETouchable>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
 function App({
   /* authenticated */
   artistOverlay,
   setArtistOverlay,
 }) {
-  const scheme = useColorScheme()
   const navigatorRef = React.useRef(null)
   const bottomSheetRef = React.useRef(null)
 
@@ -81,6 +306,11 @@ function App({
   }
 
   React.useEffect(() => {
+    async function hideSplash() {
+      SplashScreen.hideAsync().catch(console.warn)
+    }
+    setTimeout(hideSplash, 500)
+
     const deeplinkUnsubscribe = dynamicLinks().onLink(handleDynamicLink)
 
     dynamicLinks()
@@ -166,140 +396,38 @@ function App({
     []
   )
 
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: Colors.background,
+    },
+  }
+
   return (
     <View style={styles.container}>
-      <NavigationContainer
-        theme={scheme === 'dark' ? DarkTheme : DefaultTheme}
-        ref={setNavigatorRef}
-      >
+      <NavigationContainer theme={navTheme} ref={setNavigatorRef}>
         <StatusBar style="auto" />
-        <Stack.Navigator
-          initialRouteName={/* !authenticated ? 'Home' : 'Login' */ 'Home'}
+        <Drawer.Navigator
+          initialRouteName="DrawerHome"
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            drawerHideStatusBarOnOpen: true,
+            headerShown: false,
+            drawerType: 'front',
+            drawerActiveBackgroundColor: Colors.backgroundLight,
+            drawerLabelStyle: {
+              fontSize: 16,
+              color: Colors.white,
+            },
+            drawerStyle: {
+              backgroundColor: Colors.background,
+              width: 240,
+            },
+          }}
         >
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="Home"
-            component={Home}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="ArticleDetail"
-            component={ArticleDetail}
-            options={{
-              presentation: 'modal',
-              headerShown: false,
-              cardStyle: {
-                backgroundColor: '#000',
-              },
-              cardStyleInterpolator: Platform.select({
-                ios: customFade,
-                android: customFade,
-                // android: CardStyleInterpolators.forRevealFromBottomAndroid,
-              }),
-            }}
-            sharedElements={(route, otherRoute, showing) => {
-              const { id } = route.params
-              if (otherRoute?.name !== 'WebviewModal') {
-                return [
-                  { id: `item.${id}.photo` },
-                  { id: `item.${id}.text`, animation: 'fade' },
-                  { id: `item.${id}.author`, animation: 'fade' },
-                ]
-              } else {
-                return []
-              }
-            }}
-          />
-          <Stack.Screen
-            name="OnboardingModal"
-            component={OnboardingModal}
-            options={{
-              presentation: 'modal',
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="Settings"
-            component={Settings}
-            options={{
-              headerTintColor: '#fff',
-              presentation: 'modal',
-              headerTitleStyle: {},
-              headerStyle: {
-                backgroundColor: 'transparent',
-              },
-              headerBackImage: () => (
-                <DownArrow style={styles.modalDownArrow} />
-              ),
-              headerBackgroundContainerStyle: {
-                backgroundColor: Colors.background,
-              },
-              headerTitle: 'Notification Settings',
-              headerBackTitleVisible: false,
-            }}
-          />
-          <Stack.Screen
-            name="WebviewModal"
-            component={WebviewModal}
-            options={({ navigation, route }) => {
-              return {
-                headerTintColor: '#fff',
-                presentation: 'modal',
-                headerTitleStyle: {},
-                headerStyle: {
-                  backgroundColor: 'transparent',
-                },
-                headerBackImage: () => (
-                  <DownArrow style={styles.modalDownArrow} />
-                ),
-                headerBackgroundContainerStyle: {
-                  backgroundColor: Colors.background,
-                },
-                headerTitle: () => {
-                  return (
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        paddingHorizontal: Metrics.defaultPadding,
-                      }}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {route?.params?.headerTitle || 'Loading...'}
-                    </Text>
-                  )
-                },
-                headerBackTitleVisible: false,
-              }
-            }}
-          />
-          <Stack.Screen
-            name="EventDetail"
-            component={EventDetail}
-            options={{
-              headerShadowVisible: false,
-              headerTintColor: Colors.white,
-              headerBackTitleVisible: false,
-              headerStyle: {
-                backgroundColor: Colors.black,
-              },
-              cardStyle: {
-                backgroundColor: Colors.black,
-              },
-              headerTitle: 'Event Detail',
-            }}
-          />
-        </Stack.Navigator>
+          <Drawer.Screen name="DrawerHome" component={MyStack} />
+        </Drawer.Navigator>
       </NavigationContainer>
       <BottomSheet
         ref={bottomSheetRef}
@@ -338,6 +466,7 @@ function App({
               bottom: 20,
               left: 20,
             }}
+            haptic
             onPress={closeBottomSheet}
             style={styles.close}
           >
@@ -355,6 +484,7 @@ function App({
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: Colors.black,
     flex: 1,
   },
   close: {
@@ -369,7 +499,26 @@ const styles = StyleSheet.create({
     right: Metrics.defaultPadding,
   },
   modalDownArrow: {
+    transform: [{ rotate: '0deg' }],
     marginLeft: Metrics.defaultPadding,
+  },
+  drawerMenuItemText: {
+    color: Colors.white,
+    fontWeight: 'bold',
+    fontSize: 22,
+    marginLeft: Metrics.defaultPadding,
+  },
+  drawerMenuItemContainer: {
+    padding: Metrics.defaultPadding * 0.5,
+    // backgroundColor: Colors.backgroundLight,
+    borderRadius: 4,
+    marginBottom: Metrics.defaultPadding * 0.75,
+  },
+  logo: {
+    width: 60,
+    height: 45,
+    marginBottom: 12,
+    resizeMode: 'contain',
   },
 })
 

@@ -155,7 +155,10 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
       elementOpacities.value = withTiming(1)
       scrollUpOpacity.value = withTiming(0)
     })
-  })
+    return function cleanup() {
+      setStatusBarHidden(false, 'fade')
+    }
+  }, [])
 
   const animatedCloseIconStyles = useAnimatedStyle(() => {
     return {
@@ -226,6 +229,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
         contentWidth={Metrics.screenWidth - Metrics.defaultPadding * 2}
         source={{ html }}
         defaultTextProps={{
+          selectable: true,
           style: { color: '#fff', fontSize: 20, lineHeight: 27 },
         }}
         tagsStyles={tagsStyles}
@@ -293,6 +297,10 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
                     uri: data?.coverPhoto?.src,
                   }}
                   style={{
+                    shadowColor: '#000',
+                    shadowRadius: 5,
+                    shadowOpacity: 0.2,
+                    shadowOffset: { width: 5 },
                     width: '100%',
                     height: '100%',
                   }}
@@ -395,6 +403,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
             bottom: 20,
             left: 20,
           }}
+          haptic
           onPress={navigation.goBack}
           style={[animatedCloseIconStyles, styles.close]}
         >
@@ -407,6 +416,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
             bottom: 20,
             left: 20,
           }}
+          haptic
           onPress={scrollup}
           style={[animatedScrollIconStyles, styles.scrollup]}
         >
@@ -420,6 +430,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
               bottom: 20,
               left: 20,
             }}
+            haptic
             onPress={share}
             style={[animatedCloseIconStyles, styles.share]}
           >
@@ -461,7 +472,7 @@ const styles = StyleSheet.create({
   },
   contentContainerStyle: {
     backgroundColor: '#000',
-    // paddingHorizontal: 15,
+    paddingBottom: Metrics.hasNotch ? 34 : Metrics.defaultPadding,
   },
   close: {
     position: 'absolute',
@@ -471,7 +482,7 @@ const styles = StyleSheet.create({
     width: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    top: deviceInfoModule.hasNotch() ? 45 : Metrics.defaultPadding,
+    top: Metrics.hasNotch ? 45 : Metrics.defaultPadding,
     left: Metrics.defaultPadding,
   },
   scrollup: {
@@ -482,7 +493,7 @@ const styles = StyleSheet.create({
     width: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    bottom: deviceInfoModule.hasNotch() ? 34 : Metrics.defaultPadding,
+    bottom: Metrics.hasNotch ? 34 : Metrics.defaultPadding,
     right: Metrics.defaultPadding,
   },
   share: {
@@ -493,7 +504,7 @@ const styles = StyleSheet.create({
     width: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    top: deviceInfoModule.hasNotch() ? 45 : Metrics.defaultPadding,
+    top: Metrics.hasNotch ? 45 : Metrics.defaultPadding,
     right: Metrics.defaultPadding,
   },
   parallaxHeader: {

@@ -1,18 +1,12 @@
-import { StatusBar } from 'expo-status-bar'
+//@refresh reset
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import React from 'react'
-import {
-  View,
-  Image,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native'
+import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import deviceInfoModule from 'react-native-device-info'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { connect } from 'react-redux'
 import {
   getEvents,
+  getNews,
   getBlogPosts,
 } from '../../features/content/redux/contentOperations'
 import {
@@ -22,18 +16,25 @@ import {
 } from '../../features/session/redux/sessionActions'
 import Article from '../../shared/components/Article'
 import EventsCarousel from '../../shared/components/EventsCarousel'
+import NewsAlert from '../../shared/components/NewsAlert'
 import Gear from '../../shared/components/svgs/Gear'
 import { requestPushNotificationPermissions } from '../../shared/helpers/pushNotifications'
 import Colors from '../../shared/styles/Colors'
 import Metrics from '../../shared/styles/Metrics'
+import { setStatusBarHidden, StatusBar } from 'expo-status-bar'
+
+const APP_VERSION = deviceInfoModule.getVersion()
+const BUILD_NUMBER = deviceInfoModule.getBuildNumber()
 
 function Home({
   getEvents,
   getBlogPosts,
+  getNews,
   navigation,
   onboardingModalPreviouslyShown,
   blogPosts,
   events,
+  news,
   setTopicSubscriptionStatusBegin,
   setTopicSubscriptionStatusSuccess,
   setTopicSubscriptionStatusError,
@@ -42,6 +43,7 @@ function Home({
   React.useEffect(() => {
     getBlogPosts()
     getEvents()
+    getNews()
   }, [])
 
   React.useEffect(() => {
@@ -93,31 +95,29 @@ function Home({
     navigation.navigate('Settings')
   }
 
-  var today = new Date()
-  var curHr = today.getHours()
-  var text = ''
+  useFocusEffect(
+    React.useCallback(() => {
+      setStatusBarHidden(false, 'fade')
+    }, [])
+  )
+
+  function renderNews() {
+    return news.map((item, index) => {
+      return (
+        <NewsAlert
+          key={`news_article_${index}`}
+          data={item}
+          navigation={navigation}
+        />
+      )
+    })
+  }
 
   return (
-    <SafeAreaView
-      style={styles.screenContainer}
-      edges={['right', 'top', 'left']}
-    >
+    <>
       <StatusBar style="light" hidden={false} />
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Image
-            style={styles.headerTitle}
-            source={require('../../assets/warped-logo-yellow.png')}
-          />
-        </View>
-        <TouchableOpacity
-          style={styles.headerRight}
-          onPress={handleSettingsPress}
-        >
-          <Gear fill="rgba(255,255,255,0.9)" />
-        </TouchableOpacity>
-      </View>
       <View style={styles.container}>
+        <View style={styles.newsContainer}>{renderNews()}</View>
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}
@@ -129,9 +129,23 @@ function Home({
             <Text style={styles.articlesTitle}>ARTICLES</Text>
             {renderArticles()}
           </View>
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+              paddingBottom: Metrics.defaultPadding * 0.5,
+            }}
+          >
+            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+              © Good Karma Records, {new Date().getFullYear()}
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+              v{APP_VERSION} #{BUILD_NUMBER}
+            </Text>
+          </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </>
   )
 }
 
@@ -142,13 +156,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    overflow: 'hidden',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    // backgroundColor: Colors.backgroundLight,
   },
   contentContainerStyle: {
-    overflow: 'hidden',
     paddingTop: Metrics.defaultPadding,
     paddingBottom: deviceInfoModule.hasNotch() ? 25 : 15,
   },
@@ -156,24 +165,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Metrics.defaultPadding,
   },
   scrollView: {
-    overflow: 'hidden',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     flex: 1,
   },
   comingUpTitle: {
-    // color: 'rgba(255,255,255,0.9)',
-    color: Colors.yellow,
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
     letterSpacing: 1,
     paddingHorizontal: 15,
   },
   articlesTitle: {
-    // color: 'rgba(255,255,255,0.9)',
-    color: Colors.yellow,
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
     letterSpacing: 1,
     paddingBottom: 20,
   },
@@ -196,10 +200,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  newsContainer: {
+    // paddingHorizontal: Metrics.defaultPadding,
+    // paddingBottom: Metrics.defaultPadding,
+  },
 })
 
 function mapStateToProps({ session, content }) {
   return {
+    news: content?.news?.data || [],
     notificationTopics: session.notificationTopics,
     blogPosts: content?.blogPosts?.data || [],
     events: content?.events?.data || [],
@@ -209,6 +218,7 @@ function mapStateToProps({ session, content }) {
 
 const mapDispatchToProps = {
   getEvents,
+  getNews,
   getBlogPosts,
   setTopicSubscriptionStatusBegin,
   setTopicSubscriptionStatusSuccess,

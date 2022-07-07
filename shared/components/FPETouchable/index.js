@@ -10,12 +10,18 @@ import Animated, {
 import { TapGestureHandler } from 'react-native-gesture-handler'
 import * as Haptics from 'expo-haptics'
 
-function FPETouchable({ children, onPress, style = {}, onPressInDelay = 0 }) {
+function FPETouchable({
+  children,
+  onPress,
+  style = {},
+  disabled = false,
+  onPressInDelay = 0,
+  haptic = false,
+}) {
   const progress = useSharedValue(1)
   function scaleIn() {
     'worklet'
     cancelAnimation(progress)
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     progress.value = withDelay(onPressInDelay, withTiming(0))
   }
   function scaleOut() {
@@ -26,6 +32,7 @@ function FPETouchable({ children, onPress, style = {}, onPressInDelay = 0 }) {
   function onActivated() {
     'worklet'
     cancelAnimation(progress)
+    haptic && Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     progress.value = withTiming(1)
     onPress && onPress()
   }
@@ -51,6 +58,7 @@ function FPETouchable({ children, onPress, style = {}, onPressInDelay = 0 }) {
   })
   return (
     <TapGestureHandler
+      enabled={!disabled}
       onBegan={scaleIn}
       onActivated={onActivated}
       onFailed={scaleOut}

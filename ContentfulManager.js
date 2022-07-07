@@ -53,8 +53,20 @@ function transformBlogPost(post) {
   }
 }
 
+function transformNewsItem(post) {
+  return {
+    id: post.sys.id,
+    title: post.fields.title,
+    link: post.fields.link,
+  }
+}
+
 function transformBlogPosts(posts) {
   return posts.map(transformBlogPost)
+}
+
+function transformNews(posts) {
+  return posts.map(transformNewsItem)
 }
 
 function transformEvent(event) {
@@ -113,6 +125,23 @@ class ContentfulManager {
         })
         .then((response) => {
           resolve(transformBlogPosts(response?.items || []))
+        })
+        .catch((error) => {
+          console.warn(error)
+          reject(error)
+        })
+    })
+  }
+
+  getNews = () => {
+    return new Promise((resolve, reject) => {
+      this.client
+        .getEntries({
+          content_type: 'news',
+          include: 10,
+        })
+        .then((response) => {
+          resolve(transformNews(response?.items || []))
         })
         .catch((error) => {
           console.warn(error)

@@ -1,3 +1,4 @@
+//@refresh reset
 import { View, Text, Button, Dimensions } from 'react-native'
 import { connect } from 'react-redux'
 import { setOnboardingModalPreviouslyShown } from '../../features/session/redux/sessionActions'

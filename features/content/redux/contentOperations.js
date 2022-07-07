@@ -7,6 +7,9 @@ import {
   getEventsBegin,
   getEventsError,
   getEventsSuccess,
+  getNewsBegin,
+  getNewsSuccess,
+  getNewsError,
 } from './contentActions'
 import rnTextSize from 'react-native-text-size'
 
@@ -59,6 +62,22 @@ export const getEvents = () => (dispatch) => {
       .catch((error) => {
         console.warn(error)
         dispatch(getEventsError())
+        reject(error)
+      })
+  })
+}
+
+export const getNews = () => (dispatch) => {
+  return new Promise((resolve, reject) => {
+    dispatch(getNewsBegin())
+    ContentfulManager.getNews()
+      .then((response) => {
+        dispatch(getNewsSuccess(response))
+        resolve(response)
+      })
+      .catch((error) => {
+        console.warn(error)
+        dispatch(getNewsError())
         reject(error)
       })
   })

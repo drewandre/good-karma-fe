@@ -1,13 +1,32 @@
 import React from 'react'
 
-import { Text, ActivityIndicator, StyleSheet, Image, View } from 'react-native'
+import {
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  Image,
+  View,
+  Linking,
+} from 'react-native'
 import FastImage from 'react-native-fast-image'
 import { connect } from 'react-redux'
 import Colors from '../../styles/Colors'
 import Metrics from '../../styles/Metrics'
 import { LinearGradient } from 'expo-linear-gradient'
+import FPETouchable from '../FPETouchable'
 
 function ArtistOverlay({ artistOverlay }) {
+  function handleSoundCloudTap() {
+    if (artistOverlay?.soundCloudUrl) {
+      Linking.openURL(artistOverlay?.soundCloudUrl)
+    }
+  }
+
+  function handleSpotifyTap() {
+    if (artistOverlay?.spotifyUrl) {
+      Linking.openURL(artistOverlay?.spotifyUrl)
+    }
+  }
   return (
     <View style={styles.container}>
       {artistOverlay ? (
@@ -34,25 +53,29 @@ function ArtistOverlay({ artistOverlay }) {
             {artistOverlay.spotifyUrl || artistOverlay.soundCloudUrl ? (
               <View style={styles.mediaContainer}>
                 {artistOverlay.spotifyUrl ? (
-                  <Image
-                    source={require('../../../assets/spotify-button.png')}
-                    style={{
-                      width: Metrics.screenWidth * 0.3,
-                      height: 50,
-                      resizeMode: 'contain',
-                    }}
-                  />
+                  <FPETouchable onPress={handleSpotifyTap} haptic>
+                    <Image
+                      source={require('../../../assets/spotify-button.png')}
+                      style={{
+                        width: Metrics.screenWidth * 0.3,
+                        height: 50,
+                        resizeMode: 'contain',
+                      }}
+                    />
+                  </FPETouchable>
                 ) : null}
                 {artistOverlay.soundCloudUrl ? (
-                  <Image
-                    source={require('../../../assets/soundcloud-button.png')}
-                    style={{
-                      marginLeft: Metrics.defaultPadding * 0.5,
-                      width: Metrics.screenWidth * 0.3,
-                      height: 50,
-                      resizeMode: 'contain',
-                    }}
-                  />
+                  <FPETouchable onPress={handleSoundCloudTap} haptic>
+                    <Image
+                      source={require('../../../assets/soundcloud-button.png')}
+                      style={{
+                        marginLeft: Metrics.defaultPadding * 0.5,
+                        width: Metrics.screenWidth * 0.3,
+                        height: 50,
+                        resizeMode: 'contain',
+                      }}
+                    />
+                  </FPETouchable>
                 ) : null}
               </View>
             ) : null}

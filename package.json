@@ -26,6 +26,7 @@
     "@react-native-firebase/dynamic-links": "14.11.0",
     "@react-native-firebase/messaging": "14.11.0",
     "@react-native-masked-view/masked-view": "^0.2.6",
+    "@react-navigation/drawer": "^6.4.3",
     "@react-navigation/native": "^6.0.10",
     "@react-navigation/native-stack": "^6.6.2",
     "@react-navigation/stack": "^6.2.1",

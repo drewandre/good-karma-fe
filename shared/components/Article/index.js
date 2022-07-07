@@ -15,13 +15,20 @@ function Article({ data, onPress }) {
   return (
     <FPETouchable onPress={handlePress} style={styles.container}>
       <View style={styles.innerContainer}>
-        <SharedElement id={`item.${data.id}.photo`}>
-          <View style={styles.coverImage}>
-            <FastImage
-              source={{ uri: data?.coverPhoto?.src }}
-              style={{ width: '100%', height: '100%', borderRadius: 20 }}
-              resizeMode="cover"
-            />
+        <SharedElement id={`item.${data.id}.photo`} style={styles.coverImage}>
+          <FastImage
+            source={{ uri: data?.coverPhoto?.src }}
+            style={{
+              width: styles.coverImage.height,
+              height: styles.coverImage.height,
+              borderRadius: 20,
+              shadowColor: '#000',
+              shadowRadius: 5,
+              shadowOpacity: 0.2,
+              shadowOffset: { width: 5 },
+            }}
+            resizeMode="cover"
+          >
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,1)']}
               style={{
@@ -32,7 +39,7 @@ function Article({ data, onPress }) {
                 borderRadius: 20,
               }}
             />
-          </View>
+          </FastImage>
         </SharedElement>
       </View>
       <View style={styles.textContainer}>

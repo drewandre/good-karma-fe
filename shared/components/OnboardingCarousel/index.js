@@ -1,3 +1,4 @@
+//@refresh reset
 import React from 'react'
 import { Image, Text, View, StyleSheet, Dimensions, Button } from 'react-native'
 
@@ -13,6 +14,10 @@ import {
   setTopicSubscriptionStatusError,
 } from '../../../features/session/redux/sessionActions'
 import { connect } from 'react-redux'
+import Colors from '../../styles/Colors'
+import FPETouchable from '../FPETouchable'
+import UpArrow from '../svgs/UpArrow'
+import Metrics from '../../styles/Metrics'
 
 const screenWidth = Dimensions.get('screen').width
 
@@ -76,9 +81,19 @@ const OnboardingCarousel = React.memo(
             <Text>{item.title}</Text>
             <Text>{item.subtitle}</Text>
           </View>
-          <Button title={item.buttonText} onPress={advanceToNextSlide}>
-            <Text>{item.buttonText}</Text>
-          </Button>
+          <FPETouchable
+            hitSlop={{
+              top: 20,
+              right: 20,
+              bottom: 20,
+              left: 20,
+            }}
+            haptic
+            onPress={advanceToNextSlide}
+            style={styles.close}
+          >
+            <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
+          </FPETouchable>
         </View>
       )
     }, [])
@@ -139,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: screenWidth,
     borderRadius: 4,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
   },
   item: {
     paddingHorizontal: padding,
@@ -152,6 +167,18 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 5,
+  },
+  close: {
+    transform: [{ rotate: '90deg' }],
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 100,
+    height: 45,
+    width: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: Metrics.hasNotch ? 45 : Metrics.defaultPadding,
+    left: Metrics.defaultPadding,
   },
   image: {
     width: imageWidth,

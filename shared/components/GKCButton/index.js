@@ -5,7 +5,7 @@ import FPETouchable from '../FPETouchable'
 
 function GKCButton({ title, onPress, style }) {
   return (
-    <FPETouchable onPress={onPress} style={[styles.container, style]}>
+    <FPETouchable haptic onPress={onPress} style={[styles.container, style]}>
       <Text style={styles.text}>{title}</Text>
     </FPETouchable>
   )

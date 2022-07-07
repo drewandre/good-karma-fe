@@ -6,6 +6,9 @@ import {
   GET_EVENTS_SUCCESS,
   GET_EVENTS_ERROR,
   SET_ARTIST_OVERLAY,
+  GET_NEWS_BEGIN,
+  GET_NEWS_SUCCESS,
+  GET_NEWS_ERROR,
 } from './contentTypes'
 
 export const getBlogPostsBegin = () => {
@@ -43,6 +46,25 @@ export const getEventsSuccess = (payload) => {
 export const getEventsError = () => {
   return {
     type: GET_EVENTS_ERROR,
+  }
+}
+
+export const getNewsBegin = () => {
+  return {
+    type: GET_NEWS_BEGIN,
+  }
+}
+
+export const getNewsSuccess = (payload) => {
+  return {
+    type: GET_NEWS_SUCCESS,
+    payload,
+  }
+}
+
+export const getNewsError = () => {
+  return {
+    type: GET_NEWS_ERROR,
   }
 }
 

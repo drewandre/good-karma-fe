@@ -4,8 +4,16 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import store, { persistor } from './bootstrap/redux/initialize'
 import messaging from '@react-native-firebase/messaging'
+import * as SplashScreen from 'expo-splash-screen'
 
 import App from './App'
+
+// Prevent native splash screen from autohiding before App component declaration
+SplashScreen.preventAutoHideAsync()
+  .then((result) =>
+    console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
+  )
+  .catch(console.warn) // it's good to explicitly catch and inspect any error
 
 // Register background handler
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {

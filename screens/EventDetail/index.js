@@ -8,7 +8,6 @@ import Calendar from '../../shared/components/svgs/Calendar'
 import MapPin from '../../shared/components/svgs/MapPin'
 import FastImage from 'react-native-fast-image'
 import { StatusBar } from 'expo-status-bar'
-import deviceInfoModule from 'react-native-device-info'
 import Colors from '../../shared/styles/Colors'
 import moment from 'moment'
 import GKCButton from '../../shared/components/GKCButton'
@@ -25,6 +24,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import FPETouchable from '../../shared/components/FPETouchable'
 import { transformArtist } from '../../ContentfulManager'
 import base64 from 'react-native-base64'
+import Close from '../../shared/components/svgs/Close'
+import UpArrow from '../../shared/components/svgs/UpArrow'
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 const AnimatedParallaxScrollView =
@@ -192,7 +193,6 @@ function EventDetail({ data, id, navigation }) {
   })
 
   function renderData() {
-    console.log(data)
     let darkStyles =
       '&style=element:geometry|invert_lightness:true&style=feature:landscape.natural.terrain|element:geometry|visibility:on&style=feature:landscape|element:geometry.fill|color:0x292E3B&style=feature:poi|element:geometry.fill|color:0x404040&style=feature:poi.park|element:geometry.fill|color:0x0a330a&style=feature:water|element:geometry|color:0x00000000&style=feature:transit|element:geometry|visibility:on|color:0x101010&style=feature:road|element:geometry.stroke|visibility:on&style=feature:road.local|element:geometry.fill|color:0x606060&style=feature:road.arterial|element:geometry.fill|color:0x888888'
     return (
@@ -232,76 +232,94 @@ function EventDetail({ data, id, navigation }) {
             <Text style={styles.eventLocation}>{data.shortDescription}</Text>
             <View
               style={[
-                styles.rowContainer,
+                styles.infoContainer,
                 { marginTop: Metrics.defaultPadding },
               ]}
             >
               <Calendar
+                size={100}
+                fill="rgba(255, 255, 255, 0.2)"
                 style={{
-                  marginTop: 2.5,
                   marginRight: Metrics.defaultPadding * 0.5,
                 }}
               />
-              <View style={styles.wrapper}>
-                <Text style={styles.eventDate}>
-                  {moment(data.startDateTime).format('dddd MMMM Do')}
-                </Text>
-                <Text style={styles.eventTime}>
-                  {moment(data.startDateTime).format('h:mmA')} -{' '}
-                  {moment(data.endDateTime).format('h:mmA')}
-                </Text>
-                <GKCButton
-                  style={styles.button}
-                  title="Add to Calendar"
-                  onPress={handleAddToCalendar}
-                />
-              </View>
+              <Text style={[styles.eventDate]}>
+                {moment(data.startDateTime).format('dddd MMMM Do')}
+              </Text>
+              <Text style={styles.eventTime}>
+                {moment(data.startDateTime).format('h:mmA')} to{' '}
+                {moment(data.endDateTime).format('h:mmA')}
+              </Text>
+              <GKCButton
+                style={styles.button}
+                title="Add to Calendar"
+                onPress={handleAddToCalendar}
+              />
             </View>
             <View>
               <View
-                style={{
-                  flexDirection: 'row',
-                  marginTop: Metrics.defaultPadding,
-                }}
+                style={[
+                  styles.infoContainer,
+                  {
+                    marginVertical: Metrics.defaultPadding,
+                  },
+                ]}
               >
                 <MapPin
-                  fill={Colors.white}
+                  size={100}
+                  fill="rgba(255, 255, 255, 0.2)"
                   style={{
-                    marginTop: 2.5,
+                    zIndex: 1,
                     marginRight: Metrics.defaultPadding * 0.5,
                   }}
                 />
-                <View style={{ flex: 1, marginBottom: Metrics.defaultPadding }}>
-                  <Text style={styles.eventDate}>{data?.locationName}</Text>
-                  <FPETouchable onPress={handleMapPress}>
-                    <Text style={styles.eventAddress}>
-                      {data?.locationAddress}
-                    </Text>
-                  </FPETouchable>
-                </View>
+                <Text style={[styles.eventDate]}>{data?.locationName}</Text>
+                <FPETouchable onPress={handleMapPress} style={{ zIndex: 2 }}>
+                  <Text
+                    selectable
+                    style={[styles.eventTime, styles.eventAddress]}
+                  >
+                    {data?.locationAddress}
+                  </Text>
+                </FPETouchable>
+                <FPETouchable
+                  onPress={handleMapPress}
+                  style={{ zIndex: 1, marginTop: -Metrics.defaultPadding }}
+                >
+                  <Image
+                    style={styles.map}
+                    source={{
+                      // https://developers.google.com/maps/documentation/maps-static/styling
+                      // size:tiny|anchor:topleft|icon:https://i.ibb.co/Pc55DY2/warped-logo-yellow-map-pin.png
+                      uri: encodeURI(
+                        `https://maps.googleapis.com/maps/api/staticmap?center=${
+                          data?.location?.lat
+                        },${
+                          data?.location?.lon
+                        }&markers=size:mid|color:0xfdf727|${
+                          data?.location?.lat
+                        },${
+                          data?.location?.lon
+                        }&zoom=12&scale=2&sensor=false&size=${
+                          styles.map.width
+                        }x${
+                          styles.map.height + 50
+                        }&style=feature:administrative.locality|element:labels|visibility:off&style=feature:poi|element:labels|visibility:off${darkStyles}&key=AIzaSyA73p5AfXMlPgvvKawdSxu7ELS012OW7C4`
+                      ),
+                    }}
+                  />
+                  <LinearGradient
+                    colors={['rgba(0,0,0,1)', 'transparent']}
+                    style={{
+                      position: 'absolute',
+                      zIndex: 1,
+                      top: 0,
+                      width: '100%',
+                      height: '50%',
+                    }}
+                  />
+                </FPETouchable>
               </View>
-              <FPETouchable onPress={handleMapPress}>
-                <Image
-                  style={styles.map}
-                  source={{
-                    // https://developers.google.com/maps/documentation/maps-static/styling
-                    // size:tiny|anchor:topleft|icon:https://i.ibb.co/Pc55DY2/warped-logo-yellow-map-pin.png
-                    uri: encodeURI(
-                      `https://maps.googleapis.com/maps/api/staticmap?center=${
-                        data?.location?.lat
-                      },${
-                        data?.location?.lon
-                      }&markers=size:mid|color:0xfdf727|${
-                        data?.location?.lat
-                      },${
-                        data?.location?.lon
-                      }&zoom=12&scale=2&sensor=false&size=${styles.map.width}x${
-                        styles.map.height + 50
-                      }&style=feature:administrative.locality|element:labels|visibility:off&style=feature:poi|element:labels|visibility:off${darkStyles}&key=AIzaSyA73p5AfXMlPgvvKawdSxu7ELS012OW7C4`
-                    ),
-                  }}
-                />
-              </FPETouchable>
             </View>
             <Text style={styles.eventDescription}>ABOUT</Text>
           </View>
@@ -324,6 +342,19 @@ function EventDetail({ data, id, navigation }) {
             />
           </View>
         </AnimatedParallaxScrollView>
+        <FPETouchable
+          hitSlop={{
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20,
+          }}
+          haptic
+          onPress={navigation.goBack}
+          style={styles.close}
+        >
+          <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
+        </FPETouchable>
       </View>
     )
   }
@@ -348,9 +379,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  close: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 100,
+    height: 45,
+    width: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: Metrics.hasNotch ? 45 : Metrics.defaultPadding,
+    left: Metrics.defaultPadding,
+    transform: [{ rotate: '270deg' }],
+  },
+  infoContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   contentContainerStyle: {
     backgroundColor: '#000',
-    // paddingHorizontal: 15,
+    paddingBottom: Metrics.hasNotch ? 34 : Metrics.defaultPadding,
   },
   container: {
     flex: 1,
@@ -363,7 +411,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     position: 'absolute',
-    top: deviceInfoModule.hasNotch() ? 50 : 25,
+    top: Metrics.hasNotch ? 50 : 25,
     left: Metrics.defaultPadding,
   },
   parallaxHeader: {
@@ -375,20 +423,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     fontSize: 40,
+    zIndex: 2,
   },
   eventDate: {
+    paddingHorizontal: Metrics.defaultPadding * 2,
+    textAlign: 'center',
+    marginTop: 5,
     fontWeight: 'bold',
-    paddingBottom: 2,
+    paddingBottom: 5,
+    fontSize: 24,
     color: '#fff',
+    zIndex: 2,
   },
   eventTime: {
+    paddingHorizontal: Metrics.defaultPadding * 2,
+    textAlign: 'center',
+    fontSize: 16,
     color: '#fff',
   },
   eventAddress: {
-    color: '#fff',
-    // textDecorationColor: Colors.yellow,
-    // textDecorationStyle: 'solid',
-    // textDecorationLine: 'underline',
+    textDecorationColor: Colors.yellow,
+    textDecorationStyle: 'solid',
+    textDecorationLine: 'underline',
   },
   eventLocation: {
     color: '#fff',
@@ -396,9 +452,9 @@ const styles = StyleSheet.create({
   },
   eventDescription: {
     marginTop: Metrics.defaultPadding,
-    color: Colors.yellow,
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
     letterSpacing: 1,
     paddingTop: 10,
   },
@@ -427,6 +483,7 @@ const styles = StyleSheet.create({
   },
   map: {
     backgroundColor: '#111',
+    zIndex: 1,
     width: Metrics.screenWidth - Metrics.defaultPadding * 2,
     height: 200,
     borderTopLeftRadius: 20,
@@ -435,7 +492,8 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 5,
   },
   button: {
-    marginVertical: Metrics.defaultPadding,
+    marginTop: Metrics.defaultPadding,
+    marginBottom: Metrics.defaultPadding * 1.5,
   },
 })
 

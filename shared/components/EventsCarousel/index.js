@@ -10,11 +10,11 @@ import Colors from '../../styles/Colors'
 import Metrics from '../../styles/Metrics'
 import FPETouchable from '../FPETouchable'
 import Pagination from '../Pagination'
+import { LinearGradient } from 'expo-linear-gradient'
 
 const padding = Metrics.defaultPadding
-const imageRatio = 0.7076023392
 const itemWidth = Metrics.screenWidth - padding * 2
-const imageHeight = itemWidth * imageRatio
+const itemHeight = 250
 
 const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
   const progress = useSharedValue(0)
@@ -22,37 +22,44 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
   const renderItem = React.useCallback(({ item }) => {
     return (
       <FPETouchable
-        onPressInDelay={100}
         style={styles.item}
         onPress={() => {
           handleEventPress(item)
         }}
       >
         <View style={styles.contentContainer}>
-          <View style={styles.imageShadow}>
-            <FastImage
-              accessibilityIgnoresInvertColors
-              style={styles.image}
-              resizeMode="cover"
-              source={{ uri: item.coverPhoto.src }}
-            />
-          </View>
+          <FastImage
+            accessibilityIgnoresInvertColors
+            style={styles.image}
+            resizeMode="cover"
+            source={{ uri: item.coverPhoto.src }}
+          />
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,95)']}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              width: '100%',
+              height: '50%',
+              borderRadius: 20,
+            }}
+          />
           <View style={styles.textContainer}>
             <Text
               style={{
                 color: '#fff',
-                fontSize: 16,
+                fontSize: 22,
                 fontWeight: 'bold',
-                marginBottom: 5,
+                marginBottom: 3,
               }}
             >
               {item.name}
             </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
               {moment(item.date).format('dddd, MMMM Do')} •{' '}
               {moment(item.date).format('h:mmA')}
             </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
               {item.locationName}
             </Text>
           </View>
@@ -107,29 +114,30 @@ const styles = StyleSheet.create({
   },
   item: {
     paddingVertical: Metrics.defaultPadding,
-    marginRight: 20,
+    width: itemWidth - 20,
     shadowColor: '#000',
     shadowRadius: 5,
     shadowOpacity: 0.2,
     shadowOffset: { height: 5, width: 5 },
-  },
-  imageShadow: {
-    shadowColor: '#000',
-    shadowRadius: 10,
-    shadowOpacity: 0.2,
+    borderRadius: 20,
   },
   contentContainer: {
-    overflow: 'hidden',
-    backgroundColor: Colors.backgroundLight,
+    width: itemWidth - 20,
+    height: itemHeight,
+    backgroundColor: 'green',
     borderRadius: 20,
   },
   textContainer: {
-    padding: Metrics.defaultPadding,
+    position: 'absolute',
+    bottom: 0,
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
   },
   image: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: imageHeight,
+    borderRadius: 20,
+    width: '100%',
+    height: '100%',
   },
   close: {
     padding: padding,
