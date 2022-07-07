@@ -34,7 +34,7 @@
 {
   RCTAppSetupPrepareApp(application);
 
- [FIRApp configure];
+  [FIRApp configure];
 
   RCTBridge *bridge = [self.reactDelegate createBridgeWithDelegate:self launchOptions:launchOptions];
 
