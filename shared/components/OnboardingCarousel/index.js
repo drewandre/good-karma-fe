@@ -1,6 +1,14 @@
 //@refresh reset
 import React from 'react'
-import { Image, Text, View, StyleSheet, Dimensions, Button } from 'react-native'
+import {
+  Image,
+  Text,
+  View,
+  StyleSheet,
+  Dimensions,
+  Button,
+  SafeAreaView,
+} from 'react-native'
 
 import { useSharedValue } from 'react-native-reanimated'
 import Carousel from 'react-native-snap-carousel'
@@ -15,16 +23,13 @@ import {
 } from '../../../features/session/redux/sessionActions'
 import { connect } from 'react-redux'
 import Colors from '../../styles/Colors'
-import FPETouchable from '../FPETouchable'
-import UpArrow from '../svgs/UpArrow'
 import Metrics from '../../styles/Metrics'
 
 const screenWidth = Dimensions.get('screen').width
 
-const MODAL_CONTAINER_MARGIN = 15
-const MODAL_CONTAINER_WIDTH = screenWidth - MODAL_CONTAINER_MARGIN * 2
+const MODAL_CONTAINER_WIDTH = Metrics.screenWidth
 
-const padding = 15
+const padding = Metrics.defaultPadding
 const sliderWidth = MODAL_CONTAINER_WIDTH
 const imageRatio = 0.7076023392 // height/width of actual image
 const imageWidth = sliderWidth - padding * 2
@@ -39,6 +44,7 @@ const OnboardingCarousel = React.memo(
     setTopicSubscriptionStatusSuccess,
     setTopicSubscriptionStatusError,
     notificationTopics,
+    onScroll,
   }) => {
     const progress = useSharedValue(0)
     const carouselRef = React.useRef(null)
@@ -71,29 +77,18 @@ const OnboardingCarousel = React.memo(
       return (
         <View style={styles.item}>
           <View style={styles.imageContainer}>
-            <Image
+            {/* <Image
               accessibilityIgnoresInvertColors
               style={styles.image}
               source={item.image}
-            />
+            /> */}
           </View>
           <View>
-            <Text>{item.title}</Text>
-            <Text>{item.subtitle}</Text>
+            <Text style={styles.title}>
+              {item.title}
+              <Text style={styles.subtitle}> {item.subtitle}</Text>
+            </Text>
           </View>
-          <FPETouchable
-            hitSlop={{
-              top: 20,
-              right: 20,
-              bottom: 20,
-              left: 20,
-            }}
-            haptic
-            onPress={advanceToNextSlide}
-            style={styles.close}
-          >
-            <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
-          </FPETouchable>
         </View>
       )
     }, [])
@@ -107,63 +102,66 @@ const OnboardingCarousel = React.memo(
     )
 
     const scrollHandler = React.useCallback(
-      ({
-        nativeEvent: {
-          contentSize: { width },
-          contentOffset: { x },
-        },
-      }) => {
+      (event) => {
+        const {
+          nativeEvent: {
+            contentSize: { width },
+            contentOffset: { x },
+          },
+        } = event
+        if (onScroll) {
+          onScroll(event)
+        }
         setPaginationProgress(x / width)
       },
-      [setPaginationProgress]
+      [setPaginationProgress, onScroll]
     )
 
     return (
-      <View style={styles.container}>
-        <View style={styles.paginationContainer}>
-          <Pagination
-            numberOfPages={entries.length}
-            progress={progress}
-            dotWidth={dotWidth}
+      <SafeAreaView style={styles.wrapper}>
+        <View style={styles.container}>
+          <Carousel
+            ref={setCarouselRef}
+            data={entries}
+            renderItem={renderItem}
+            sliderWidth={screenWidth}
+            itemWidth={sliderWidth}
+            inactiveSlideOpacity={0}
+            inactiveSlideScale={1}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
+            windowSize={screenWidth}
           />
-          <Button title="Close" onPress={close}>
-            <Text>Close</Text>
-          </Button>
+          <View style={styles.paginationContainer}>
+            <Pagination
+              numberOfPages={entries.length}
+              progress={progress}
+              dotWidth={dotWidth}
+            />
+          </View>
         </View>
-        <Carousel
-          ref={setCarouselRef}
-          data={entries}
-          scrollEnabled={false}
-          renderItem={renderItem}
-          sliderWidth={screenWidth}
-          itemWidth={sliderWidth}
-          inactiveSlideOpacity={0}
-          inactiveSlideScale={1}
-          onScroll={scrollHandler}
-          scrollEventThrottle={16}
-          windowSize={screenWidth}
-        />
-      </View>
+      </SafeAreaView>
     )
   }
 )
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     alignItems: 'center',
-    width: screenWidth,
+    width: Metrics.screenWidth,
     borderRadius: 4,
-    backgroundColor: Colors.background,
   },
   item: {
-    paddingHorizontal: padding,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: Metrics.defaultPadding,
+    justifyContent: 'space-between',
     flex: 1,
   },
   imageContainer: {
-    paddingVertical: padding,
+    paddingVertical: Metrics.defaultPadding,
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 5,
@@ -184,17 +182,22 @@ const styles = StyleSheet.create({
     width: imageWidth,
     height: imageHeight,
   },
-  close: {
-    padding: padding,
-    paddingBottom: 0,
-    zIndex: 9999,
+  title: {
+    fontSize: 40,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  subtitle: {
+    fontSize: 40,
+    fontWeight: '100',
+    color: Colors.white,
   },
   paginationContainer: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: padding,
-    paddingVertical: 15,
+    paddingHorizontal: Metrics.defaultPadding,
+    paddingTop: Metrics.defaultPadding * 0.5,
   },
 })
 

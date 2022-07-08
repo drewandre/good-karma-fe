@@ -74,6 +74,7 @@ function transformEvent(event) {
     id: event.sys.id,
     name: event.fields.name,
     shortDescription: event.fields.shortDescription,
+    coverCharge: event.fields.coverCharge,
     coverPhoto: transformMedia(event.fields.coverPhoto),
     date: event.fields.date,
     endDateTime: event.fields.endDateTime,

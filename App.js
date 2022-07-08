@@ -37,6 +37,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import Gear from './shared/components/svgs/Gear'
 import HomeIcon from './shared/components/svgs/Home'
+import { CardStyleInterpolators } from '@react-navigation/stack'
 
 const forFade = ({ current, next }) => {
   const opacity = Animated.add(
@@ -151,7 +152,6 @@ function MyStack() {
           cardStyleInterpolator: Platform.select({
             ios: customFade,
             android: customFade,
-            // android: CardStyleInterpolators.forRevealFromBottomAndroid,
           }),
         }}
         sharedElements={(route, otherRoute, showing) => {
@@ -171,8 +171,10 @@ function MyStack() {
         name="OnboardingModal"
         component={OnboardingModal}
         options={{
+          cardStyleInterpolator:
+            CardStyleInterpolators.forFadeFromBottomAndroid,
           gestureEnabled: false,
-          presentation: 'modal',
+          presentation: 'transparentModal',
           headerShown: false,
         }}
       />

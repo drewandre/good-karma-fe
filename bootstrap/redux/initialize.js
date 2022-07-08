@@ -48,7 +48,7 @@ const store = createStore(
 
 const persistor = persistStore(store)
 
-persistor.purge()
+// persistor.purge()
 
 export { persistor, persistConfig }
 export default store

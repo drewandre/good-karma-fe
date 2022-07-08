@@ -1,56 +1,145 @@
 //@refresh reset
-import { View, Text, Button, Dimensions } from 'react-native'
+import { StatusBar } from 'expo-status-bar'
+import { View, Image, Dimensions, StyleSheet } from 'react-native'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated'
 import { connect } from 'react-redux'
-import { setOnboardingModalPreviouslyShown } from '../../features/session/redux/sessionActions'
+import {
+  setOnboardingModalPreviouslyShown,
+  setTopicSubscriptionStatusBegin,
+  setTopicSubscriptionStatusSuccess,
+  setTopicSubscriptionStatusError,
+} from '../../features/session/redux/sessionActions'
 import OnboardingCarousel from '../../shared/components/OnboardingCarousel'
+import Colors from '../../shared/styles/Colors'
+import BackArrow from '../../shared/components/svgs/BackArrow'
+import FPETouchable from '../../shared/components/FPETouchable'
+import Metrics from '../../shared/styles/Metrics'
+import { requestPushNotificationPermissions } from '../../shared/helpers/pushNotifications'
 
 const { width: screenWidth } = Dimensions.get('screen')
 
 const entries = [
   {
-    title: 'Welcome to the Good Karma Family',
-    subtitle: 'Some text about the company mission statement',
+    title: 'Welcome to Good Karma Club',
+    subtitle: "where we're democratizing the music industry",
     buttonText: 'Get started',
-    image: require('../../assets/warped-logo.png'),
+    image: require('../../assets/asset_1.png'),
   },
   {
-    title: 'Our app keeps you connected with our community',
-    subtitle: 'Some text about what you can do with the app',
+    title: 'Our mission',
+    subtitle: 'is to support artists and being decentralized access to fans',
     buttonText: 'Next',
     image: require('../../assets/warped-logo.png'),
   },
   {
-    title: 'The best way to support the community is to stay active',
-    subtitle: 'Some text about enabling push notifications',
+    title: 'Our app was designed',
+    subtitle:
+      'to keep you in the loop with Good Karma Records events, blogs, and news',
     buttonText: 'Next',
     image: require('../../assets/warped-logo.png'),
   },
   {
-    title: 'You are all set!',
-    subtitle: 'An additional weclome message here',
+    title: 'Stay in touch',
+    subtitle:
+      'by enabling push notifications for news, event reminders, and new articles',
     buttonText: 'Done',
     image: require('../../assets/warped-logo.png'),
   },
 ]
 
-function OnboardingModal({ navigation, setOnboardingModalPreviouslyShown }) {
+function OnboardingModal({
+  navigation,
+  setOnboardingModalPreviouslyShown,
+  handleFinish,
+  notificationTopics,
+}) {
   function goBack() {
     setOnboardingModalPreviouslyShown(true)
     navigation.goBack()
   }
+  const translationY = useSharedValue(0)
+  const animatedBackgroundStyles = useAnimatedStyle(() => {
+    return {
+      position: 'absolute',
+      left: -100 + -translationY.value * 0.75,
+      right: 0,
+      height: '100%',
+      resizeMode: 'cover',
+    }
+  })
+
+  function onScroll(event) {
+    translationY.value =
+      (event.nativeEvent.contentOffset.x /
+        event.nativeEvent.contentSize.width) *
+      1000
+  }
+
+  async function handleFinish() {
+    await requestPushNotificationPermissions({
+      setTopicSubscriptionStatusBegin,
+      setTopicSubscriptionStatusSuccess,
+      setTopicSubscriptionStatusError,
+      notificationTopics,
+    })
+    goBack()
+  }
   return (
     <View style={{ flex: 1 }}>
+      <StatusBar style="light" />
+      <Animated.Image
+        source={require('../../assets/asset_1.png')}
+        style={animatedBackgroundStyles}
+      />
+      <FPETouchable style={styles.nextArrow} onPress={handleFinish}>
+        <BackArrow fill={Colors.white} style={styles.nextArrowIcon} />
+      </FPETouchable>
+      <Image
+        source={require('../../assets/warped-logo.png')}
+        style={{
+          position: 'absolute',
+          top: Metrics.hasNotch ? 50 : Metrics.defaultPadding,
+          tintColor: Colors.white,
+          width: 100,
+          height: 100,
+          resizeMode: 'contain',
+          left: Metrics.defaultPadding,
+        }}
+      />
       <OnboardingCarousel
         close={goBack}
+        onScroll={onScroll}
         entries={entries}
         dotWidth={screenWidth / (entries.length + 3)}
       />
     </View>
   )
 }
+const styles = StyleSheet.create({
+  nextArrow: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 100,
+    height: 45,
+    width: 45,
+    zIndex: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: Metrics.hasNotch ? 34 : Metrics.defaultPadding,
+    right: Metrics.defaultPadding,
+  },
+  nextArrowIcon: {
+    transform: [{ rotate: '180deg' }],
+  },
+})
 
-function mapStateToProps({}) {
-  return {}
+function mapStateToProps({ session }) {
+  return {
+    notificationTopics: session.notificationTopics,
+  }
 }
 
 const mapDispatchToProps = {

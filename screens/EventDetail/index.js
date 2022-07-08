@@ -1,6 +1,14 @@
 //@refresh reset
 import React from 'react'
-import { Image, View, StyleSheet, Text, Linking } from 'react-native'
+import {
+  Image,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  Text,
+  Linking,
+  Share,
+} from 'react-native'
 import { connect } from 'react-redux'
 import RenderHtml from 'react-native-render-html'
 import Metrics from '../../shared/styles/Metrics'
@@ -24,8 +32,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import FPETouchable from '../../shared/components/FPETouchable'
 import { transformArtist } from '../../ContentfulManager'
 import base64 from 'react-native-base64'
-import Close from '../../shared/components/svgs/Close'
 import UpArrow from '../../shared/components/svgs/UpArrow'
+import ShareIcon from '../../shared/components/svgs/Share'
+import Money from '../../shared/components/svgs/Money'
+import { setArtistOverlay } from '../../features/content/redux/contentActions'
+import dynamicLinks from '@react-native-firebase/dynamic-links'
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 const AnimatedParallaxScrollView =
@@ -51,7 +62,7 @@ const linkContainerStyles = {
 
 const PRIMARY_ASSOCIATED_DOMAIN = 'goodkarmaclub.xyz'
 
-function EventDetail({ data, id, navigation }) {
+function EventDetail({ data, id, navigation, setArtistOverlay }) {
   const translationY = useSharedValue(0)
 
   React.useEffect(() => {
@@ -192,6 +203,42 @@ function EventDetail({ data, id, navigation }) {
     }
   })
 
+  const [shareLoading, setShareLoading] = React.useState(false)
+
+  async function share() {
+    try {
+      setShareLoading(true)
+      const link = await dynamicLinks().buildLink({
+        link: 'https://invertase.io',
+        // domainUriPrefix is created in your Firebase console
+        domainUriPrefix: 'https://xyz.page.link',
+        // optional setup which updates Firebase analytics campaign
+        // "banner". This also needs setting up before hand
+        analytics: {
+          campaign: 'banner',
+        },
+      })
+      setShareLoading(false)
+      const result = await Share.share({
+        message:
+          'React Native | A framework for building native apps using React',
+        url: link,
+      })
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      setShareLoading(false)
+      console.error('Could not create or share a dynamic link!', error)
+    }
+  }
+
   function renderData() {
     let darkStyles =
       '&style=element:geometry|invert_lightness:true&style=feature:landscape.natural.terrain|element:geometry|visibility:on&style=feature:landscape|element:geometry.fill|color:0x292E3B&style=feature:poi|element:geometry.fill|color:0x404040&style=feature:poi.park|element:geometry.fill|color:0x0a330a&style=feature:water|element:geometry|color:0x00000000&style=feature:transit|element:geometry|visibility:on|color:0x101010&style=feature:road|element:geometry.stroke|visibility:on&style=feature:road.local|element:geometry.fill|color:0x606060&style=feature:road.arterial|element:geometry.fill|color:0x888888'
@@ -229,23 +276,19 @@ function EventDetail({ data, id, navigation }) {
         >
           <View style={styles.metadataContainer}>
             <Text style={styles.eventTitle}>{data.name}</Text>
-            <Text style={styles.eventLocation}>{data.shortDescription}</Text>
+            {/* <Text style={styles.eventLocation}>{data.shortDescription}</Text> */}
             <View
               style={[
                 styles.infoContainer,
                 { marginTop: Metrics.defaultPadding },
               ]}
             >
-              <Calendar
-                size={100}
-                fill="rgba(255, 255, 255, 0.2)"
-                style={{
-                  marginRight: Metrics.defaultPadding * 0.5,
-                }}
-              />
-              <Text style={[styles.eventDate]}>
-                {moment(data.startDateTime).format('dddd MMMM Do')}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Calendar size={25} fill="rgba(255, 255, 255, 1)" style={{}} />
+                <Text style={[styles.eventDate]}>
+                  {moment(data.startDateTime).format('dddd MMMM Do')}
+                </Text>
+              </View>
               <Text style={styles.eventTime}>
                 {moment(data.startDateTime).format('h:mmA')} to{' '}
                 {moment(data.endDateTime).format('h:mmA')}
@@ -256,70 +299,71 @@ function EventDetail({ data, id, navigation }) {
                 onPress={handleAddToCalendar}
               />
             </View>
+            <View
+              style={[
+                styles.infoContainer,
+                { marginTop: Metrics.defaultPadding * 2 },
+              ]}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Money size={25} fill="rgba(255, 255, 255, 1)" style={{}} />
+                <Text style={[styles.eventDate]}>
+                  {data.coverCharge || 'No cover charge'}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={[
+                styles.infoContainer,
+                { marginTop: Metrics.defaultPadding * 2 },
+              ]}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MapPin size={25} fill="rgba(255, 255, 255, 1)" style={{}} />
+                <Text style={[styles.eventDate]}>{data.locationName}</Text>
+              </View>
+              <FPETouchable onPress={handleMapPress}>
+                <Text
+                  selectable
+                  style={[styles.eventTime, styles.eventAddress]}
+                >
+                  {data.locationAddress}
+                </Text>
+              </FPETouchable>
+            </View>
             <View>
-              <View
-                style={[
-                  styles.infoContainer,
-                  {
-                    marginVertical: Metrics.defaultPadding,
-                  },
-                ]}
-              >
-                <MapPin
-                  size={100}
-                  fill="rgba(255, 255, 255, 0.2)"
-                  style={{
-                    zIndex: 1,
-                    marginRight: Metrics.defaultPadding * 0.5,
+              <FPETouchable onPress={handleMapPress} style={{ zIndex: 1 }}>
+                <Image
+                  style={styles.map}
+                  source={{
+                    // https://developers.google.com/maps/documentation/maps-static/styling
+                    // size:tiny|anchor:topleft|icon:https://i.ibb.co/Pc55DY2/warped-logo-yellow-map-pin.png
+                    uri: encodeURI(
+                      `https://maps.googleapis.com/maps/api/staticmap?center=${
+                        data?.location?.lat
+                      },${
+                        data?.location?.lon
+                      }&markers=size:mid|color:0xfdf727|${
+                        data?.location?.lat
+                      },${
+                        data?.location?.lon
+                      }&zoom=12&scale=2&sensor=false&size=${styles.map.width}x${
+                        styles.map.height + 50
+                      }&style=feature:administrative.locality|element:labels|visibility:off&style=feature:poi|element:labels|visibility:off${darkStyles}&key=AIzaSyA73p5AfXMlPgvvKawdSxu7ELS012OW7C4`
+                    ),
                   }}
                 />
-                <Text style={[styles.eventDate]}>{data?.locationName}</Text>
-                <FPETouchable onPress={handleMapPress} style={{ zIndex: 2 }}>
-                  <Text
-                    selectable
-                    style={[styles.eventTime, styles.eventAddress]}
-                  >
-                    {data?.locationAddress}
-                  </Text>
-                </FPETouchable>
-                <FPETouchable
-                  onPress={handleMapPress}
-                  style={{ zIndex: 1, marginTop: -Metrics.defaultPadding }}
-                >
-                  <Image
-                    style={styles.map}
-                    source={{
-                      // https://developers.google.com/maps/documentation/maps-static/styling
-                      // size:tiny|anchor:topleft|icon:https://i.ibb.co/Pc55DY2/warped-logo-yellow-map-pin.png
-                      uri: encodeURI(
-                        `https://maps.googleapis.com/maps/api/staticmap?center=${
-                          data?.location?.lat
-                        },${
-                          data?.location?.lon
-                        }&markers=size:mid|color:0xfdf727|${
-                          data?.location?.lat
-                        },${
-                          data?.location?.lon
-                        }&zoom=12&scale=2&sensor=false&size=${
-                          styles.map.width
-                        }x${
-                          styles.map.height + 50
-                        }&style=feature:administrative.locality|element:labels|visibility:off&style=feature:poi|element:labels|visibility:off${darkStyles}&key=AIzaSyA73p5AfXMlPgvvKawdSxu7ELS012OW7C4`
-                      ),
-                    }}
-                  />
-                  <LinearGradient
-                    colors={['rgba(0,0,0,1)', 'transparent']}
-                    style={{
-                      position: 'absolute',
-                      zIndex: 1,
-                      top: 0,
-                      width: '100%',
-                      height: '50%',
-                    }}
-                  />
-                </FPETouchable>
-              </View>
+                <LinearGradient
+                  colors={['rgba(0,0,0,1)', 'transparent']}
+                  style={{
+                    position: 'absolute',
+                    zIndex: 1,
+                    top: 0,
+                    width: '100%',
+                    height: '50%',
+                  }}
+                />
+              </FPETouchable>
             </View>
             <Text style={styles.eventDescription}>ABOUT</Text>
           </View>
@@ -355,6 +399,25 @@ function EventDetail({ data, id, navigation }) {
         >
           <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
         </FPETouchable>
+        {data ? (
+          <FPETouchable
+            hitSlop={{
+              top: 20,
+              right: 20,
+              bottom: 20,
+              left: 20,
+            }}
+            haptic
+            onPress={share}
+            style={[styles.share]}
+          >
+            {shareLoading ? (
+              <ActivityIndicator color="rgba(255,255,255,0.9)" />
+            ) : (
+              <ShareIcon size={17} fill="rgba(255,255,255,0.9)" />
+            )}
+          </FPETouchable>
+        ) : null}
       </View>
     )
   }
@@ -391,10 +454,19 @@ const styles = StyleSheet.create({
     left: Metrics.defaultPadding,
     transform: [{ rotate: '270deg' }],
   },
+  share: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 100,
+    height: 45,
+    width: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: Metrics.hasNotch ? 45 : Metrics.defaultPadding,
+    right: Metrics.defaultPadding,
+  },
   infoContainer: {
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   contentContainerStyle: {
     backgroundColor: '#000',
@@ -423,23 +495,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     fontSize: 40,
-    zIndex: 2,
   },
   eventDate: {
-    paddingHorizontal: Metrics.defaultPadding * 2,
-    textAlign: 'center',
-    marginTop: 5,
+    flex: 1,
+    paddingHorizontal: Metrics.defaultPadding + 5,
     fontWeight: 'bold',
-    paddingBottom: 5,
-    fontSize: 24,
-    color: '#fff',
-    zIndex: 2,
-  },
-  eventTime: {
-    paddingHorizontal: Metrics.defaultPadding * 2,
-    textAlign: 'center',
     fontSize: 16,
     color: '#fff',
+  },
+  eventTime: {
+    left: 40,
+    paddingHorizontal: Metrics.defaultPadding * 0.5,
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.6)',
   },
   eventAddress: {
     textDecorationColor: Colors.yellow,
@@ -486,14 +554,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
     width: Metrics.screenWidth - Metrics.defaultPadding * 2,
     height: 200,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 5,
+    borderRadius: 20,
   },
   button: {
-    marginTop: Metrics.defaultPadding,
-    marginBottom: Metrics.defaultPadding * 1.5,
+    marginTop: Metrics.defaultPadding * 0.5,
+    left: 50,
   },
 })
 
@@ -507,4 +572,8 @@ function mapStateToProps({ content }, { route }) {
   }
 }
 
-export default connect(mapStateToProps)(EventDetail)
+const mapDispatchToProps = {
+  setArtistOverlay,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(EventDetail)
