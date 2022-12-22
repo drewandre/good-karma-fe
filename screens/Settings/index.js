@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { connect } from 'react-redux'
 import SettingsItem from '../../shared/components/SettingsItem'
 import Colors from '../../shared/styles/Colors'
@@ -8,6 +8,7 @@ import {
   setTopicSubscriptionStatusSuccess,
   setTopicSubscriptionStatusError,
 } from '../../features/session/redux/sessionActions'
+import Metrics from '../../shared/styles/Metrics'
 
 function Settings({
   setTopicSubscriptionStatusBegin,
@@ -43,6 +44,19 @@ function Settings({
   }
   return (
     <View style={styles.container}>
+      <Text
+        maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+        style={styles.sectionTitle}
+      >
+        Push Notifications
+      </Text>
+      <Text
+        maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+        style={styles.sectionSubtitle}
+      >
+        Manage how you receive push notifications from the Good Karma Records
+        crew.
+      </Text>
       <SettingsItem
         topic="newArticles"
         title="New Articles"
@@ -82,6 +96,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 1,
     paddingBottom: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 20,
+    letterSpacing: 1,
+    paddingBottom: 5,
+  },
+  sectionSubtitle: {
+    paddingBottom: Metrics.defaultPadding,
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
   },
 })
 

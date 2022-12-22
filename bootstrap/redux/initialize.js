@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import DeviceInfo from 'react-native-device-info'
 import { createStore, applyMiddleware } from 'redux'
-import { persistReducer, persistStore } from 'redux-persist'
+import { createTransform, persistReducer, persistStore } from 'redux-persist'
 import hardSet from 'redux-persist/lib/stateReconciler/hardSet'
 import thunk from 'redux-thunk'
 import rootReducer from './rootReducer'
@@ -22,12 +22,26 @@ var CURRENT_PERSIST_VERSION_KEY = generatePersistStorageVersionKey(
   BUILD_NUMBER
 )
 
+const contentDisallow = createTransform(
+  (inboundState /* key */) => {
+    return inboundState
+  },
+  (outboundState /* key */) => {
+    return {
+      ...outboundState,
+      artistOverlay: null,
+    }
+  },
+  { whitelist: ['content'] }
+)
+
 const persistConfig = {
   key: 'root',
   stateReconciler: hardSet,
   storage: AsyncStorage,
   version: CURRENT_PERSIST_VERSION_KEY,
   migrate: handleStateMigration,
+  transforms: [contentDisallow],
   debug: __DEV__,
 }
 
@@ -48,7 +62,7 @@ const store = createStore(
 
 const persistor = persistStore(store)
 
-// persistor.purge()
+persistor.purge()
 
 export { persistor, persistConfig }
 export default store

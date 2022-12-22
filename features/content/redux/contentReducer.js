@@ -35,26 +35,43 @@ export default produce((draft, action) => {
     case GET_BLOG_POSTS_BEGIN:
       return draft
     case GET_BLOG_POSTS_SUCCESS:
-      draft.blogPosts.data = action.payload
+      if (!draft.blogPosts) {
+        draft.blogPosts = []
+      }
+      if (action.payload) {
+        draft.blogPosts.data = action.payload
+      }
       return draft
     case GET_BLOG_POSTS_ERROR:
       return draft
     case GET_EVENTS_BEGIN:
       return draft
     case GET_EVENTS_SUCCESS:
-      draft.events.data = action.payload
+      if (!draft.events) {
+        draft.events = []
+      }
+      if (action.payload) {
+        draft.events.data = action.payload
+      }
       return draft
     case GET_EVENTS_ERROR:
       return draft
     case GET_NEWS_BEGIN:
       return draft
     case GET_NEWS_SUCCESS:
-      draft.news.data = action.payload
+      if (!draft.news) {
+        draft.news = []
+      }
+      if (action.payload) {
+        draft.news.data = action.payload
+      }
       return draft
     case GET_NEWS_ERROR:
       return draft
     case SET_ARTIST_OVERLAY:
-      draft.artistOverlay = action.payload
+      if (action.payload) {
+        draft.artistOverlay = action.payload
+      }
       return draft
     default:
       return draft

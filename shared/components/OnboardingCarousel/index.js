@@ -59,16 +59,6 @@ const OnboardingCarousel = React.memo(
       close()
     }
 
-    function advanceToNextSlide() {
-      if (carouselRef.current.currentIndex === entries.length - 2) {
-        requestPushPermissions()
-      } else if (carouselRef.current.currentIndex === entries.length - 1) {
-        close()
-      } else {
-        carouselRef.current.snapToNext()
-      }
-    }
-
     const setCarouselRef = React.useCallback((ref) => {
       carouselRef.current = ref
     }, [])
@@ -84,9 +74,18 @@ const OnboardingCarousel = React.memo(
             /> */}
           </View>
           <View>
-            <Text style={styles.title}>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.title}
+            >
               {item.title}
-              <Text style={styles.subtitle}> {item.subtitle}</Text>
+              <Text
+                maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                style={styles.subtitle}
+              >
+                {' '}
+                {item.subtitle}
+              </Text>
             </Text>
           </View>
         </View>
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
   close: {
     transform: [{ rotate: '90deg' }],
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 100,
     height: 45,
     width: 45,
@@ -183,12 +182,12 @@ const styles = StyleSheet.create({
     height: imageHeight,
   },
   title: {
-    fontSize: 40,
+    fontSize: 30,
     fontWeight: '600',
     color: Colors.white,
   },
   subtitle: {
-    fontSize: 40,
+    fontSize: 30,
     fontWeight: '100',
     color: Colors.white,
   },

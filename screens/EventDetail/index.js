@@ -13,6 +13,7 @@ import { connect } from 'react-redux'
 import RenderHtml from 'react-native-render-html'
 import Metrics from '../../shared/styles/Metrics'
 import Calendar from '../../shared/components/svgs/Calendar'
+import CalendarAdd from '../../shared/components/svgs/CalendarAdd'
 import MapPin from '../../shared/components/svgs/MapPin'
 import FastImage from 'react-native-fast-image'
 import { StatusBar } from 'expo-status-bar'
@@ -209,19 +210,27 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
     try {
       setShareLoading(true)
       const link = await dynamicLinks().buildLink({
-        link: 'https://invertase.io',
-        // domainUriPrefix is created in your Firebase console
-        domainUriPrefix: 'https://xyz.page.link',
-        // optional setup which updates Firebase analytics campaign
-        // "banner". This also needs setting up before hand
+        link: `https://goodkarmaclub.page.link/eventDetail/${data?.id}`,
+        domainUriPrefix: 'https://goodkarmaclub.page.link',
         analytics: {
-          campaign: 'banner',
+          campaign: 'event',
+        },
+        android: {
+          packageName: 'xyz.goodkarmaclub',
+        },
+        ios: {
+          bundleId: 'xyz.goodkarmaclub',
+          appStoreId: '123456789',
+        },
+        social: {
+          title: 'Good Karma Records',
+          descriptionText: data?.title,
+          imageUrl: data?.coverPhoto?.src,
         },
       })
       setShareLoading(false)
       const result = await Share.share({
-        message:
-          'React Native | A framework for building native apps using React',
+        message: data?.name,
         url: link,
       })
       if (result.action === Share.sharedAction) {
@@ -240,6 +249,7 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
   }
 
   function renderData() {
+    console.log(data)
     let darkStyles =
       '&style=element:geometry|invert_lightness:true&style=feature:landscape.natural.terrain|element:geometry|visibility:on&style=feature:landscape|element:geometry.fill|color:0x292E3B&style=feature:poi|element:geometry.fill|color:0x404040&style=feature:poi.park|element:geometry.fill|color:0x0a330a&style=feature:water|element:geometry|color:0x00000000&style=feature:transit|element:geometry|visibility:on|color:0x101010&style=feature:road|element:geometry.stroke|visibility:on&style=feature:road.local|element:geometry.fill|color:0x606060&style=feature:road.arterial|element:geometry.fill|color:0x888888'
     return (
@@ -275,21 +285,35 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
           )}
         >
           <View style={styles.metadataContainer}>
-            <Text style={styles.eventTitle}>{data.name}</Text>
-            {/* <Text style={styles.eventLocation}>{data.shortDescription}</Text> */}
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.eventTitle}
+            >
+              {data.name}
+            </Text>
+            {/* <Text maxFontSizeMultiplier={global.maxFontSizeMultiplier} style={styles.eventLocation}>{data.shortDescription}</Text> */}
             <View
               style={[
                 styles.infoContainer,
-                { marginTop: Metrics.defaultPadding },
+                { marginTop: Metrics.defaultPadding * 1.5 },
               ]}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Calendar size={25} fill="rgba(255, 255, 255, 1)" style={{}} />
-                <Text style={[styles.eventDate]}>
+                <Calendar size={25} fill="rgba(255,255,255,0.5)" style={{}} />
+                <Text
+                  maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                  style={[styles.eventDate]}
+                >
                   {moment(data.startDateTime).format('dddd MMMM Do')}
                 </Text>
+                {/* <FPETouchable onPress={handleAddToCalendar}>
+                  <CalendarAdd size={25} fill="rgba(255,255,255,0.5)" />
+                </FPETouchable> */}
               </View>
-              <Text style={styles.eventTime}>
+              <Text
+                maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                style={styles.eventTime}
+              >
                 {moment(data.startDateTime).format('h:mmA')} to{' '}
                 {moment(data.endDateTime).format('h:mmA')}
               </Text>
@@ -297,33 +321,39 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
                 style={styles.button}
                 title="Add to Calendar"
                 onPress={handleAddToCalendar}
-              />
-            </View>
-            <View
-              style={[
-                styles.infoContainer,
-                { marginTop: Metrics.defaultPadding * 2 },
-              ]}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Money size={25} fill="rgba(255, 255, 255, 1)" style={{}} />
-                <Text style={[styles.eventDate]}>
-                  {data.coverCharge || 'No cover charge'}
+              >
+                <FPETouchable onPress={handleAddToCalendar}>
+                  <CalendarAdd size={20} fill="rgba(0,0,0,1)" />
+                </FPETouchable>
+                <Text
+                  maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                  style={{
+                    marginLeft: 5,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Add to Calendar
                 </Text>
-              </View>
+              </GKCButton>
             </View>
             <View
               style={[
                 styles.infoContainer,
-                { marginTop: Metrics.defaultPadding * 2 },
+                { marginTop: Metrics.defaultPadding * 1.5 },
               ]}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <MapPin size={25} fill="rgba(255, 255, 255, 1)" style={{}} />
-                <Text style={[styles.eventDate]}>{data.locationName}</Text>
+                <MapPin size={25} fill="rgba(255,255,255,0.5)" style={{}} />
+                <Text
+                  maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                  style={[styles.eventDate]}
+                >
+                  {data.locationName}
+                </Text>
               </View>
               <FPETouchable onPress={handleMapPress}>
                 <Text
+                  maxFontSizeMultiplier={global.maxFontSizeMultiplier}
                   selectable
                   style={[styles.eventTime, styles.eventAddress]}
                 >
@@ -353,7 +383,7 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
                     ),
                   }}
                 />
-                <LinearGradient
+                {/* <LinearGradient
                   colors={['rgba(0,0,0,1)', 'transparent']}
                   style={{
                     position: 'absolute',
@@ -362,17 +392,37 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
                     width: '100%',
                     height: '50%',
                   }}
-                />
+                /> */}
               </FPETouchable>
             </View>
-            <Text style={styles.eventDescription}>ABOUT</Text>
+            {/* <View
+              style={[
+                styles.infoContainer,
+                { marginTop: Metrics.defaultPadding },
+              ]}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Money size={25} fill="rgba(255,255,255,0.5)" style={{}} />
+                <Text maxFontSizeMultiplier={global.maxFontSizeMultiplier} style={[styles.eventDate]}>
+                  {data.coverCharge || 'No cover charge'}
+                </Text>
+              </View>
+            </View> */}
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.eventDescription}
+            >
+              About
+            </Text>
           </View>
           <View style={styles.container}>
             <RenderHtml
               contentWidth={Metrics.screenWidth - 40}
               source={{ html }}
               defaultTextProps={{
-                style: { color: '#fff', fontSize: 20, lineHeight: 27 },
+                maxFontSizeMultiplier: global.maxFontSizeMultiplier,
+                selectable: true,
+                style: { color: '#fff', fontSize: 16 },
               }}
               defaultViewProps={{ backgroundColor: '#000' }}
               baseStyle={{
@@ -397,7 +447,7 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
           onPress={navigation.goBack}
           style={styles.close}
         >
-          <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
+          <UpArrow size={16} fill="#fff" />
         </FPETouchable>
         {data ? (
           <FPETouchable
@@ -412,9 +462,9 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
             style={[styles.share]}
           >
             {shareLoading ? (
-              <ActivityIndicator color="rgba(255,255,255,0.9)" />
+              <ActivityIndicator color="#fff" />
             ) : (
-              <ShareIcon size={17} fill="rgba(255,255,255,0.9)" />
+              <ShareIcon size={17} fill="#fff" />
             )}
           </FPETouchable>
         ) : null}
@@ -425,7 +475,16 @@ function EventDetail({ data, id, navigation, setArtistOverlay }) {
   return (
     <View style={styles.container}>
       <StatusBar style="light" animated />
-      {data ? renderData() : <Text>Could not find this event!</Text>}
+      {data ? (
+        renderData()
+      ) : (
+        <Text
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+          style={{ color: Colors.white }}
+        >
+          Could not find this event!
+        </Text>
+      )}
     </View>
   )
 }
@@ -444,7 +503,7 @@ const styles = StyleSheet.create({
   },
   close: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 100,
     height: 45,
     width: 45,
@@ -456,7 +515,7 @@ const styles = StyleSheet.create({
   },
   share: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 100,
     height: 45,
     width: 45,
@@ -497,32 +556,32 @@ const styles = StyleSheet.create({
     fontSize: 40,
   },
   eventDate: {
-    flex: 1,
     paddingHorizontal: Metrics.defaultPadding + 5,
     fontWeight: 'bold',
     fontSize: 16,
     color: '#fff',
   },
   eventTime: {
+    flex: 1,
     left: 40,
     paddingHorizontal: Metrics.defaultPadding * 0.5,
     fontSize: 16,
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.7)',
   },
   eventAddress: {
-    textDecorationColor: Colors.yellow,
-    textDecorationStyle: 'solid',
-    textDecorationLine: 'underline',
+    // textDecorationColor: Colors.yellow,
+    // textDecorationStyle: 'solid',
+    // textDecorationLine: 'underline',
   },
   eventLocation: {
     color: '#fff',
     fontSize: 20,
   },
   eventDescription: {
+    fontWeight: 'bold',
+    fontSize: 20,
     marginTop: Metrics.defaultPadding,
     color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
     letterSpacing: 1,
     paddingTop: 10,
   },
@@ -553,11 +612,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#111',
     zIndex: 1,
     width: Metrics.screenWidth - Metrics.defaultPadding * 2,
+    alignSelf: 'flex-end',
     height: 200,
     borderRadius: 20,
   },
   button: {
-    marginTop: Metrics.defaultPadding * 0.5,
+    marginTop: Metrics.defaultPadding * 0.75,
     left: 50,
   },
 })
@@ -566,7 +626,7 @@ function mapStateToProps({ content }, { route }) {
   const { id } = route.params
   return {
     id,
-    data: content.events.data.find((event) => {
+    data: (content?.events?.data || []).find((event) => {
       return event.id === id
     }),
   }

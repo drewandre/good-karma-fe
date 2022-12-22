@@ -4,6 +4,7 @@ import { View, Image, Dimensions, StyleSheet } from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated'
 import { connect } from 'react-redux'
 import {
@@ -23,28 +24,30 @@ const { width: screenWidth } = Dimensions.get('screen')
 
 const entries = [
   {
-    title: 'Welcome to Good Karma Club',
-    subtitle: "where we're democratizing the music industry",
+    title: 'Good Karma Records',
+    subtitle:
+      'is a community owned record label built to empower web3 artist communities.',
     buttonText: 'Get started',
     image: require('../../assets/asset_1.png'),
   },
   {
-    title: 'Our mission',
-    subtitle: 'is to support artists and being decentralized access to fans',
+    title: 'Our shared treasury',
+    subtitle:
+      'powers live events, artist marketing, music production, and more.',
     buttonText: 'Next',
     image: require('../../assets/warped-logo.png'),
   },
   {
     title: 'Our app was designed',
     subtitle:
-      'to keep you in the loop with Good Karma Records events, blogs, and news',
+      'to keep you in the loop with Good Karma Records events, blogs, and news.',
     buttonText: 'Next',
     image: require('../../assets/warped-logo.png'),
   },
   {
     title: 'Stay in touch',
     subtitle:
-      'by enabling push notifications for news, event reminders, and new articles',
+      'by enabling push notifications for the latest news and event reminders.',
     buttonText: 'Done',
     image: require('../../assets/warped-logo.png'),
   },
@@ -61,6 +64,7 @@ function OnboardingModal({
     navigation.goBack()
   }
   const translationY = useSharedValue(0)
+  const nextButtonVisibility = useSharedValue(0)
   const animatedBackgroundStyles = useAnimatedStyle(() => {
     return {
       position: 'absolute',
@@ -72,11 +76,21 @@ function OnboardingModal({
   })
 
   function onScroll(event) {
-    translationY.value =
-      (event.nativeEvent.contentOffset.x /
-        event.nativeEvent.contentSize.width) *
-      1000
+    const percentage =
+      event.nativeEvent.contentOffset.x / event.nativeEvent.contentSize.width
+    if (percentage > 0.7) {
+      nextButtonVisibility.value = 1
+    } else {
+      nextButtonVisibility.value = 0
+    }
+    translationY.value = percentage * 1000
   }
+
+  const animatedNextButtonStyles = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(nextButtonVisibility.value),
+    }
+  })
 
   async function handleFinish() {
     await requestPushNotificationPermissions({
@@ -94,9 +108,11 @@ function OnboardingModal({
         source={require('../../assets/asset_1.png')}
         style={animatedBackgroundStyles}
       />
-      <FPETouchable style={styles.nextArrow} onPress={handleFinish}>
-        <BackArrow fill={Colors.white} style={styles.nextArrowIcon} />
-      </FPETouchable>
+      <Animated.View style={[animatedNextButtonStyles, styles.nextArrow]}>
+        <FPETouchable haptic onPress={handleFinish}>
+          <BackArrow fill={Colors.white} style={styles.nextArrowIcon} />
+        </FPETouchable>
+      </Animated.View>
       <Image
         source={require('../../assets/warped-logo.png')}
         style={{

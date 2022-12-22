@@ -14,7 +14,7 @@ function clamp(value, lowerBound, upperBound) {
   return Math.min(Math.max(lowerBound, value), upperBound)
 }
 
-const DEFAULT_SIZE = 10
+const DEFAULT_SIZE = 7
 
 function AnimatedDot({ index, style, progress, multiplier, scaleDots }) {
   const animatedStyles = useAnimatedStyle(() => {
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginHorizontal: 5,
     padding: 0,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: '#fff',
   },
 })
 

@@ -193,19 +193,27 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
     try {
       setShareLoading(true)
       const link = await dynamicLinks().buildLink({
-        link: 'https://invertase.io',
-        // domainUriPrefix is created in your Firebase console
-        domainUriPrefix: 'https://xyz.page.link',
-        // optional setup which updates Firebase analytics campaign
-        // "banner". This also needs setting up before hand
+        link: `https://goodkarmaclub.page.link/articleDetail/${data?.id}`,
+        domainUriPrefix: 'https://goodkarmaclub.page.link',
         analytics: {
-          campaign: 'banner',
+          campaign: 'article',
+        },
+        android: {
+          packageName: 'xyz.goodkarmaclub',
+        },
+        ios: {
+          bundleId: 'xyz.goodkarmaclub',
+          appStoreId: '123456789',
+        },
+        social: {
+          title: 'Good Karma Records',
+          descriptionText: data?.title,
+          imageUrl: data?.coverPhoto?.src,
         },
       })
       setShareLoading(false)
       const result = await Share.share({
-        message:
-          'React Native | A framework for building native apps using React',
+        message: data?.title,
         url: link,
       })
       if (result.action === Share.sharedAction) {
@@ -229,6 +237,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
         contentWidth={Metrics.screenWidth - Metrics.defaultPadding * 2}
         source={{ html }}
         defaultTextProps={{
+          maxFontSizeMultiplier: global.maxFontSizeMultiplier,
           selectable: true,
           style: { color: '#fff', fontSize: 20, lineHeight: 27 },
         }}
@@ -335,7 +344,11 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
                 },
               ]}
             >
-              <Text allowFontScaling={false} style={styles.sectionSpeakerText}>
+              <Text
+                maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                allowFontScaling={false}
+                style={styles.sectionSpeakerText}
+              >
                 {data?.title}
               </Text>
             </SharedElement>
@@ -360,7 +373,10 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
               }}
             />
             <View>
-              <Text style={styles.sectionAuthorTitle}>
+              <Text
+                maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                style={styles.sectionAuthorTitle}
+              >
                 {data?.author?.name}
                 {data?.author?.discordUsername ? (
                   <FPETouchable
@@ -370,6 +386,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
                     }}
                   >
                     <Text
+                      maxFontSizeMultiplier={global.maxFontSizeMultiplier}
                       style={{
                         ...styles.sectionAuthorTitle,
                         fontWeight: 'normal',
@@ -385,11 +402,17 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
                 ) : null}
               </Text>
               {data?.author?.title ? (
-                <Text style={styles.sectionAuthorSubtitle}>
+                <Text
+                  maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                  style={styles.sectionAuthorSubtitle}
+                >
                   {data?.author?.title}
                 </Text>
               ) : null}
-              <Text style={styles.sectionAuthorSubtitle}>
+              <Text
+                maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+                style={styles.sectionAuthorSubtitle}
+              >
                 {moment(data.createdAt).format('dddd MMMM Do, YYYY')}
               </Text>
             </View>
@@ -407,7 +430,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
           onPress={navigation.goBack}
           style={[animatedCloseIconStyles, styles.close]}
         >
-          <Close size={16} fill="rgba(255,255,255,0.9)" />
+          <Close size={16} fill="#fff" />
         </FPETouchable>
         <FPETouchable
           hitSlop={{
@@ -420,7 +443,7 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
           onPress={scrollup}
           style={[animatedScrollIconStyles, styles.scrollup]}
         >
-          <UpArrow size={16} fill="rgba(255,255,255,0.9)" />
+          <UpArrow size={16} fill="#fff" />
         </FPETouchable>
         {data ? (
           <FPETouchable
@@ -435,9 +458,9 @@ function ArticleDetail({ data, navigation, setArtistOverlay }) {
             style={[animatedCloseIconStyles, styles.share]}
           >
             {shareLoading ? (
-              <ActivityIndicator color="rgba(255,255,255,0.9)" />
+              <ActivityIndicator color="#fff" />
             ) : (
-              <ShareIcon size={17} fill="rgba(255,255,255,0.9)" />
+              <ShareIcon size={17} fill="#fff" />
             )}
           </FPETouchable>
         ) : null}
@@ -476,7 +499,7 @@ const styles = StyleSheet.create({
   },
   close: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 100,
     height: 45,
     width: 45,
@@ -498,7 +521,7 @@ const styles = StyleSheet.create({
   },
   share: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 100,
     height: 45,
     width: 45,
@@ -519,7 +542,7 @@ const styles = StyleSheet.create({
   },
   sectionSpeakerText: {
     color: '#fff',
-    fontSize: 55,
+    fontSize: 47.5,
     fontWeight: 'bold',
   },
   sectionAuthorTitle: {

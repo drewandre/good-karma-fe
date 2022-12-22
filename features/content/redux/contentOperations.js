@@ -15,7 +15,7 @@ import rnTextSize from 'react-native-text-size'
 
 const fontSpecs = {
   fontFamily: undefined,
-  fontSize: 55,
+  fontSize: 47.5,
   usePreciseWidth: true,
   allowFontScaling: false,
   fontWeight: 'bold',

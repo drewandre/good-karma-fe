@@ -46,6 +46,7 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
           />
           <View style={styles.textContainer}>
             <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
               style={{
                 color: '#fff',
                 fontSize: 22,
@@ -55,11 +56,17 @@ const EventsCarousel = React.memo(({ handleEventPress, entries = [] }) => {
             >
               {item.name}
             </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={{ color: '#fff', fontSize: 16 }}
+            >
               {moment(item.date).format('dddd, MMMM Do')} •{' '}
               {moment(item.date).format('h:mmA')}
             </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={{ color: '#fff', fontSize: 16 }}
+            >
               {item.locationName}
             </Text>
           </View>

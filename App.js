@@ -38,6 +38,10 @@ import { createDrawerNavigator } from '@react-navigation/drawer'
 import Gear from './shared/components/svgs/Gear'
 import HomeIcon from './shared/components/svgs/Home'
 import { CardStyleInterpolators } from '@react-navigation/stack'
+import deviceInfoModule from 'react-native-device-info'
+
+const APP_VERSION = deviceInfoModule.getVersion()
+const BUILD_NUMBER = deviceInfoModule.getBuildNumber()
 
 const forFade = ({ current, next }) => {
   const opacity = Animated.add(
@@ -112,15 +116,8 @@ function MyStack() {
         options={({ navigation }) => ({
           headerStyleInterpolator: forFade,
           headerStyle: {
-            shadowRadius: 8,
-            shadowColor: '#000',
             shadowOpacity: 0.4,
-            shadowOffset: {
-              height: 0,
-            },
-            backgroundColor: Colors.backgroundLight,
-            borderBottomWidth: 0,
-            borderWidth: 0,
+            backgroundColor: Colors.background,
           },
           headerLeft: () => {
             return (
@@ -186,15 +183,8 @@ function MyStack() {
           // presentation: 'modal',
           headerTitleStyle: {},
           headerStyle: {
-            shadowRadius: 8,
-            shadowColor: '#000',
             shadowOpacity: 0.4,
-            shadowOffset: {
-              height: 0,
-            },
-            backgroundColor: Colors.backgroundLight,
-            borderBottomWidth: 0,
-            borderWidth: 0,
+            backgroundColor: Colors.background,
           },
           headerBackImage: () => <DownArrow style={styles.modalDownArrow} />,
           headerBackgroundContainerStyle: {
@@ -222,6 +212,7 @@ function MyStack() {
             headerTitle: () => {
               return (
                 <Text
+                  maxFontSizeMultiplier={global.maxFontSizeMultiplier}
                   style={{
                     color: '#fff',
                     fontSize: 16,
@@ -260,8 +251,51 @@ function MyStack() {
 
 function CustomDrawerContent(props) {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView {...props} style={{ padding: Metrics.defaultPadding }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        shadowColor: '#000',
+        shadowOpacity: 1,
+        shadowRadius: 10,
+      }}
+    >
+      <ScrollView
+        {...props}
+        style={{
+          padding: Metrics.defaultPadding,
+        }}
+      >
+        <Image
+          source={require('./assets/gkc-face.png')}
+          style={{
+            alignSelf: 'center',
+            width: 50,
+            height: 50,
+            marginBottom: Metrics.defaultPadding,
+            resizeMode: 'contain',
+            tintColor: Colors.yellow,
+          }}
+        />
+        {/* <Text
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+          style={{
+            textAlign: 'center',
+            paddingTop: Metrics.defaultPadding,
+            color: 'rgba(255,255,255,0.5)',
+          }}
+        >
+          Good Karma Club v{DEVICE_VERSION}
+        </Text>
+        <Text
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+          style={{
+            textAlign: 'center',
+            paddingBottom: Metrics.defaultPadding,
+            color: 'rgba(255,255,255,0.5)',
+          }}
+        >
+          © Good Karma Records {new Date().getFullYear()}
+        </Text> */}
         <FPETouchable
           style={styles.drawerMenuItemContainer}
           onPress={() => {
@@ -271,7 +305,12 @@ function CustomDrawerContent(props) {
         >
           <View style={{ flexDirection: 'row' }}>
             <HomeIcon fill={Colors.white} style={{ width: 50 }} />
-            <Text style={styles.drawerMenuItemText}>Home</Text>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.drawerMenuItemText}
+            >
+              Home
+            </Text>
           </View>
         </FPETouchable>
         <FPETouchable
@@ -283,10 +322,35 @@ function CustomDrawerContent(props) {
         >
           <View style={{ flexDirection: 'row' }}>
             <Gear fill={Colors.white} style={{ width: 50 }} />
-            <Text style={styles.drawerMenuItemText}>Settings</Text>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.drawerMenuItemText}
+            >
+              Settings
+            </Text>
           </View>
         </FPETouchable>
       </ScrollView>
+      <Text
+        maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+        style={{
+          textAlign: 'center',
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: 12,
+        }}
+      >
+        Version {APP_VERSION} #{BUILD_NUMBER}
+      </Text>
+      <Text
+        maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+        style={{
+          textAlign: 'center',
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: 12,
+        }}
+      >
+        © Good Karma Records {new Date().getFullYear()}
+      </Text>
     </SafeAreaView>
   )
 }
@@ -414,16 +478,23 @@ function App({
           initialRouteName="DrawerHome"
           drawerContent={(props) => <CustomDrawerContent {...props} />}
           screenOptions={{
-            drawerHideStatusBarOnOpen: true,
             headerShown: false,
-            drawerType: 'front',
+            drawerType: 'back',
             drawerActiveBackgroundColor: Colors.backgroundLight,
             drawerLabelStyle: {
               fontSize: 16,
               color: Colors.white,
             },
+            drawerContentStyle: {
+              shadowColor: '#000',
+              shadowOpacity: 1,
+              shadowRadius: 10,
+            },
             drawerStyle: {
-              backgroundColor: Colors.background,
+              shadowColor: '#000',
+              shadowOpacity: 1,
+              shadowRadius: 10,
+              backgroundColor: Colors.backgroundLight,
               width: 240,
             },
           }}
@@ -472,7 +543,7 @@ function App({
             onPress={closeBottomSheet}
             style={styles.close}
           >
-            <Close size={16} fill="rgba(255,255,255,0.9)" />
+            <Close size={16} fill="#fff" />
           </FPETouchable>
         )}
         backdropComponent={renderBackdrop}
@@ -491,7 +562,7 @@ const styles = StyleSheet.create({
   },
   close: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 100,
     height: 45,
     width: 45,

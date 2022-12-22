@@ -49,7 +49,12 @@ function ArtistOverlay({ artistOverlay }) {
             }}
           />
           <View style={styles.artistInfoContainer}>
-            <Text style={styles.titleText}>{artistOverlay.name}</Text>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.titleText}
+            >
+              {artistOverlay.name}
+            </Text>
             {artistOverlay.spotifyUrl || artistOverlay.soundCloudUrl ? (
               <View style={styles.mediaContainer}>
                 {artistOverlay.spotifyUrl ? (

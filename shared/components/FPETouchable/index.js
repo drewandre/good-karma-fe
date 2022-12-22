@@ -58,6 +58,12 @@ function FPETouchable({
   })
   return (
     <TapGestureHandler
+      hitSlop={{
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: 20,
+      }}
       enabled={!disabled}
       onBegan={scaleIn}
       onActivated={onActivated}

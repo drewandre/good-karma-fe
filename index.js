@@ -8,6 +8,8 @@ import * as SplashScreen from 'expo-splash-screen'
 
 import App from './App'
 
+global.maxFontSizeMultiplier = 1.4
+
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
   .then((result) =>

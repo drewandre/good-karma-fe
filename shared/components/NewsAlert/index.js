@@ -23,7 +23,12 @@ function NewsAlert({ data, navigation }) {
     <FPETouchable disabled={!data.link} onPress={handleLinkPress}>
       <View style={styles.container}>
         <Info fill={LIGHT_COLOR} style={styles.icon} />
-        <Text style={styles.title}>{data.title}</Text>
+        <Text
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+          style={styles.title}
+        >
+          {data.title}
+        </Text>
       </View>
     </FPETouchable>
   )

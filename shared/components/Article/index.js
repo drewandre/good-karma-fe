@@ -45,7 +45,7 @@ function Article({ data, onPress }) {
       <View style={styles.textContainer}>
         <SharedElement id={`item.${data.id}.text`}>
           <Text
-            // maxFontSizeMultiplier={1.2}
+            maxFontSizeMultiplier={global.maxFontSizeMultiplier}
             numberOfLines={4}
             adjustsFontSizeToFit
             style={styles.articleTitle}
@@ -54,7 +54,7 @@ function Article({ data, onPress }) {
           </Text>
         </SharedElement>
         <Text
-          // maxFontSizeMultiplier={1.2}
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
           numberOfLines={2}
           adjustsFontSizeToFit
           style={styles.articleSubtitle}
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   articleSubtitle: {
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 12,
   },
   coverImage: {

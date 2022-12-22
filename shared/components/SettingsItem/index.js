@@ -12,6 +12,7 @@ function SettingsItem({ onChange, topic, title, description, subscribed }) {
     <View style={styles.container}>
       <View style={styles.textContainer}>
         <Text
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
           style={{
             color: '#fff',
             fontSize: 16,
@@ -22,6 +23,7 @@ function SettingsItem({ onChange, topic, title, description, subscribed }) {
           {title}
         </Text>
         <Text
+          maxFontSizeMultiplier={global.maxFontSizeMultiplier}
           style={{
             color: 'rgba(255,255,255,0.7)',
           }}

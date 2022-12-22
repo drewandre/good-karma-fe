@@ -78,6 +78,7 @@ function transformEvent(event) {
     coverPhoto: transformMedia(event.fields.coverPhoto),
     date: event.fields.date,
     endDateTime: event.fields.endDateTime,
+    startDateTime: event.fields.startDateTime,
     location: event.fields.location,
     locationAddress: event.fields.locationAddress,
     locationName: event.fields.locationName,

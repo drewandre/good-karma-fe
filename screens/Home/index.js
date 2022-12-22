@@ -1,7 +1,15 @@
 //@refresh reset
-import { useFocusEffect, useIsFocused } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native'
 import React from 'react'
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
+import {
+  View,
+  AppState,
+  Image,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+} from 'react-native'
 import deviceInfoModule from 'react-native-device-info'
 import { connect } from 'react-redux'
 import {
@@ -17,14 +25,10 @@ import {
 import Article from '../../shared/components/Article'
 import EventsCarousel from '../../shared/components/EventsCarousel'
 import NewsAlert from '../../shared/components/NewsAlert'
-import Gear from '../../shared/components/svgs/Gear'
 import { requestPushNotificationPermissions } from '../../shared/helpers/pushNotifications'
 import Colors from '../../shared/styles/Colors'
 import Metrics from '../../shared/styles/Metrics'
 import { setStatusBarHidden, StatusBar } from 'expo-status-bar'
-
-const APP_VERSION = deviceInfoModule.getVersion()
-const BUILD_NUMBER = deviceInfoModule.getBuildNumber()
 
 function Home({
   getEvents,
@@ -40,11 +44,13 @@ function Home({
   setTopicSubscriptionStatusError,
   notificationTopics,
 }) {
+  const [refreshing, setRefreshing] = React.useState(false)
   React.useEffect(() => {
-    getBlogPosts()
-    getEvents()
-    getNews()
+    onRefresh()
   }, [])
+
+  const appState = React.useRef(AppState.currentState)
+  const [appStateVisible, setAppStateVisible] = React.useState(appState.current)
 
   React.useEffect(() => {
     if (onboardingModalPreviouslyShown) {
@@ -58,6 +64,23 @@ function Home({
       setTimeout(() => {
         navigation.navigate('OnboardingModal')
       }, 1000)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        onRefresh()
+      }
+      appState.current = nextAppState
+      setAppStateVisible(appState.current)
+    })
+
+    return () => {
+      subscription.remove()
     }
   }, [])
 
@@ -113,20 +136,67 @@ function Home({
     })
   }
 
+  async function onRefresh() {
+    setRefreshing(true)
+    const promises = [getBlogPosts(), getNews(), getEvents()]
+    await Promise.all(promises).finally(() => {
+      setRefreshing(false)
+    })
+  }
+
   return (
     <>
       <StatusBar style="light" hidden={false} />
       <View style={styles.container}>
         <View style={styles.newsContainer}>{renderNews()}</View>
         <ScrollView
+          refreshControl={
+            <RefreshControl
+              tintColor={Colors.white}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainerStyle}
         >
-          <Text style={styles.comingUpTitle}>UPCOMING EVENTS</Text>
+          <Text
+            maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+            style={styles.comingUpTitle}
+          >
+            Upcoming Events
+          </Text>
+          <Text
+            maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+            style={{
+              paddingHorizontal: Metrics.defaultPadding,
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: 14,
+              paddingBottom: 5,
+            }}
+          >
+            Official Good Karma Records events and virtual meetups.
+          </Text>
           {renderEvents()}
           <View style={styles.articleContainer}>
-            <Text style={styles.articlesTitle}>ARTICLES</Text>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={styles.articlesTitle}
+            >
+              Articles
+            </Text>
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: 14,
+                paddingBottom: 25,
+              }}
+            >
+              Latest from the Good Karma Records team about artists, our
+              company, and industry news.
+            </Text>
             {renderArticles()}
           </View>
           <View
@@ -136,11 +206,21 @@ function Home({
               paddingBottom: Metrics.defaultPadding * 0.5,
             }}
           >
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+            <Image
+              source={require('../../assets/gkc-face.png')}
+              style={{
+                width: 50,
+                height: 50,
+                marginBottom: Metrics.defaultPadding,
+                tintColor: Colors.yellow,
+                resizeMode: 'contain',
+              }}
+            />
+            <Text
+              maxFontSizeMultiplier={global.maxFontSizeMultiplier}
+              style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}
+            >
               © Good Karma Records, {new Date().getFullYear()}
-            </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
-              v{APP_VERSION} #{BUILD_NUMBER}
             </Text>
           </View>
         </ScrollView>
@@ -152,34 +232,35 @@ function Home({
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
   },
   contentContainerStyle: {
-    paddingTop: Metrics.defaultPadding,
+    paddingTop: Metrics.defaultPadding * 1.3,
     paddingBottom: deviceInfoModule.hasNotch() ? 25 : 15,
   },
   articleContainer: {
     paddingHorizontal: Metrics.defaultPadding,
   },
   scrollView: {
+    backgroundColor: Colors.background,
     flex: 1,
   },
   comingUpTitle: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
     letterSpacing: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: Metrics.defaultPadding,
+    paddingBottom: 5,
   },
   articlesTitle: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
+    paddingBottom: 5,
     letterSpacing: 1,
-    paddingBottom: 20,
   },
   header: {
     alignSelf: 'center',
